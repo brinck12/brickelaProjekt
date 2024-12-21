@@ -4,3 +4,4 @@ Foglalás
 Időpontemlékeztető
 Megjelenés esetén admin pipál, majd emailt kap az ügyfél hogy értékelje, ha admin elutasítja, akkor fenyegető email
 Admin szabit vesz ki
+cigány
