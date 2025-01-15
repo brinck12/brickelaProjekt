@@ -1,0 +1,7 @@
+{
+    "name": "brickelacuts/projekt",
+    "description": "projektmunka",
+    "require": {
+        "firebase/php-jwt": "^6.10"
+    }
+}
