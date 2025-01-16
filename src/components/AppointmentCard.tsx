@@ -1,4 +1,4 @@
-import { Calendar, Clock, User } from "lucide-react";
+import { Calendar, Clock, User, Scissors } from "lucide-react";
 import { Appointment } from "../types/appointment";
 
 interface AppointmentCardProps {
@@ -15,18 +15,14 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
         </div>
         <span
           className={`px-2 py-1 rounded text-sm ${
-            appointment.status === "completed"
+            appointment.status === "Teljesítve"
               ? "bg-green-900/50 text-green-200"
-              : appointment.status === "upcoming"
+              : appointment.status === "Foglalt"
               ? "bg-blue-900/50 text-blue-200"
               : "bg-red-900/50 text-red-200"
           }`}
         >
-          {appointment.status === "completed"
-            ? "Teljesítve"
-            : appointment.status === "upcoming"
-            ? "Közelgő"
-            : "Törölve"}
+          {appointment.status}
         </span>
       </div>
 
@@ -39,6 +35,15 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
           <Clock className="w-4 h-4 text-barber-accent" />
           <span>{appointment.time}</span>
         </div>
+        <div className="flex items-center gap-2 text-barber-light">
+          <Scissors className="w-4 h-4 text-barber-accent" />
+          <span>{appointment.service}</span>
+        </div>
+        {appointment.note && (
+          <div className="mt-2 text-sm text-barber-secondary">
+            <p>Megjegyzés: {appointment.note}</p>
+          </div>
+        )}
       </div>
     </div>
   );

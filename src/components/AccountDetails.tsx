@@ -2,6 +2,7 @@ import { User, Mail, Phone } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import { updateUserData } from "../api/apiService";
+import { ApiError } from "../api/apiService";
 
 export default function AccountDetails() {
   const { user, refreshUser } = useAuth();
@@ -16,17 +17,18 @@ export default function AccountDetails() {
     e.preventDefault();
     try {
       const response = await updateUserData(formData);
-
-      if (response.status === 200) {
+      if (response.data.success) {
         setIsEditing(false);
         await refreshUser();
         alert("Adatok sikeresen frissítve!");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      if (err instanceof ApiError) {
+        alert(err.message);
       } else {
         alert("Hiba történt a mentés során.");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Hiba történt a mentés során.");
     }
   };
 

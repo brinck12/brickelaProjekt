@@ -1,9 +1,9 @@
 export interface User {
-  id: string;
-  Email: string;
-  Osztaly: "admin" | "user";
+  id: number;
   Keresztnev: string;
+  Email: string;
   Telefonszam: string;
+  Osztaly: string;
 }
 
 export interface AuthState {

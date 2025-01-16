@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import FormInput from "./FormInput";
-import axios from "axios";
+import { register } from "../api/apiService";
+import { ApiError } from "../api/apiService";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -24,24 +25,33 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost/project/api/register.php",
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          telefonszam: formData.telefonszam,
-        }
+      console.log("Attempting registration with:", {
+        ...formData,
+        password: "[REDACTED]",
+        confirmPassword: "[REDACTED]",
+      });
+
+      const response = await register(
+        formData.email,
+        formData.password,
+        formData.name,
+        formData.telefonszam
       );
-      console.log(response);
+
+      console.log("Registration response:", response);
+
       if (response.data.success) {
-        navigate("/"); // Sikeres regisztráció után irányítsuk a főoldalra
+        navigate("/login");
       } else {
         setError(response.data.message || "A regisztráció nem sikerült");
       }
     } catch (err) {
       console.error("Regisztrációs hiba:", err);
-      setError("Hiba történt a regisztráció során");
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Hiba történt a regisztráció során");
+      }
     }
   };
 
@@ -53,12 +63,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-barber-primary">
       <Navbar />
       <div className="py-12 px-4">
         <div className="max-w-md mx-auto">
-          <div className="bg-slate-900 rounded-lg shadow-lg p-8">
-            <h1 className="text-3xl font-bold mb-6 text-indigo-400">
+          <div className="bg-barber-dark rounded-lg shadow-lg p-8">
+            <h1 className="text-3xl font-bold mb-6 text-barber-accent">
               Regisztráció
             </h1>
 
@@ -116,17 +126,17 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                className="w-full bg-barber-accent hover:bg-barber-secondary text-barber-primary py-3 rounded-lg font-semibold transition-colors"
               >
                 Regisztráció
               </button>
             </form>
 
-            <p className="mt-4 text-center text-slate-400">
+            <p className="mt-4 text-center text-barber-light">
               Már van fiókod?{" "}
               <Link
                 to="/login"
-                className="text-indigo-400 hover:text-indigo-300"
+                className="text-barber-accent hover:text-barber-secondary"
               >
                 Jelentkezz be itt
               </Link>

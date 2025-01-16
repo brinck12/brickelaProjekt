@@ -1,7 +1,12 @@
 {
-    "name": "brickelacuts/projekt",
-    "description": "projektmunka",
-    "require": {
-        "firebase/php-jwt": "^6.10"
+  "name": "brickelacuts/projekt",
+  "description": "projektmunka",
+  "require": {
+    "firebase/php-jwt": "^6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
     }
+  }
 }

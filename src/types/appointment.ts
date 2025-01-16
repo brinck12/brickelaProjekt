@@ -3,6 +3,7 @@ export interface Appointment {
   barberName: string;
   date: string;
   time: string;
-  status: 'completed' | 'upcoming' | 'cancelled';
-  service?: string;
+  status: "Foglalt" | "Teljesítve" | "Lemondva";
+  service: string;
+  note?: string;
 }

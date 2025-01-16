@@ -5,19 +5,35 @@ header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
 
-require_once 'config.php'; // Database connection configuration
-
-$sql = 
-"SELECT FodraszID as id, CONCAT(Vezeteknev, ' ', Keresztnev) AS nev, specializacio, evtapasztalat, reszletek, kep FROM Fodraszok";
-$result = $conn->query($sql);
-
-$barbers = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $barbers[] = $row;
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
 }
 
-echo json_encode($barbers);
-$conn->close();
+require_once 'config.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    try {
+        $sql = "SELECT * FROM fodraszok";
+        $result = $conn->query($sql);
+        
+        $barbers = [];
+        while($row = $result->fetch_assoc()) {
+            $barbers[] = [
+                'id' => $row['FodraszID'],
+                'nev' => $row['Vezeteknev'] . ' ' . $row['Keresztnev'],
+                'kep' => $row['kep'],
+                'evtapasztalat' => $row['evtapasztalat'],
+                'specializacio' => $row['specializacio'],
+                'reszletek' => $row['reszletek'],
+                'startTime' => intval($row['KezdesIdo']),
+                'endTime' => intval($row['BefejezesIdo'])
+            ];
+        }
+        
+        echo json_encode($barbers);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+}
 ?>

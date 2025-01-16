@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { fetchBarbers } from "../api/apiService"; // API hívás
 import { Barber } from "../types/barber"; // Típusdefiníció
 import BarberCard from "./BarberCard"; // Vélemények megjelenítése
 
 export default function BarberSelection() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const serviceId = searchParams.get("service");
 
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,9 @@ export default function BarberSelection() {
                 <BarberCard
                   key={barber.id}
                   barber={barber}
-                  onSelect={() => navigate(`/booking-form/${barber.id}`)}
+                  onSelect={() =>
+                    navigate(`/booking-form/${barber.id}?service=${serviceId}`)
+                  }
                 />
               ))}
             </div>

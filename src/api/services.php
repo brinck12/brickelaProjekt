@@ -9,32 +9,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-require_once 'config.php'; // Database configuration and connection
+require_once 'config.php';
 
-// Kapcsolódási hiba ellenőrzése
-if (!$conn) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
-    exit;
-}
-// SQL lekérdezés a szolgáltatások lekéréséhez
-$sql = "SELECT SzolgaltatasID, SzolgaltatasNev, IdotartamPerc, Ar, Leiras, KepURL FROM szolgaltatasok";
-$result = $conn->query($sql);
-
-$services = [];
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $services[] = [
-            'id' => $row['SzolgaltatasID'],
-            'name' => $row['SzolgaltatasNev'],
-            'duration' => $row['IdotartamPerc'],
-            'price' => $row['Ar'],
-            'description' => $row['Leiras'],  // Ha van leírás
-            'image' => $row['KepURL']         // Ha van kép URL
-        ];
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    try {
+        $sql = "SELECT * FROM szolgaltatasok";
+        $result = $conn->query($sql);
+        
+        $services = [];
+        while($row = $result->fetch_assoc()) {
+            $services[] = [
+                'id' => $row['SzolgaltatasID'],
+                'name' => $row['SzolgaltatasNev'],
+                'description' => $row['Leiras'],
+                'duration' => $row['IdotartamPerc'],
+                'price' => intval($row['Ar']),
+                'image' => $row['KepURL']
+            ];
+        }
+        
+        echo json_encode($services);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
     }
 }
-
-echo json_encode($services);
-$conn->close();
-
 ?>

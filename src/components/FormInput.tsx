@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface FormInputProps {
   label: string;
@@ -7,15 +7,17 @@ interface FormInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
+  disabled?: boolean;
 }
 
-export default function FormInput({ 
-  label, 
-  type, 
-  name, 
-  value, 
-  onChange, 
-  required 
+export default function FormInput({
+  label,
+  type,
+  name,
+  value,
+  onChange,
+  required,
+  disabled,
 }: FormInputProps) {
   return (
     <div>
@@ -31,6 +33,7 @@ export default function FormInput({
                  text-slate-300 placeholder-slate-500"
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
     </div>
   );
