@@ -37,6 +37,13 @@ export interface Appointment {
   note?: string;
 }
 
+export interface Reference {
+  id: number;
+  image: string;
+  description?: string;
+  createdAt: string;
+}
+
 export class ApiError extends Error {
   constructor(message: string, public statusCode?: number) {
     super(message);
@@ -233,4 +240,8 @@ export const fetchAppointments = async (): Promise<Appointment[]> => {
     handleApiError(error);
     throw error;
   }
+};
+
+export const fetchReferences = (barberId: number) => {
+  return apiClient.post("/get-references.php", { barberId });
 };

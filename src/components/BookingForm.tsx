@@ -233,7 +233,7 @@ export default function BookingForm() {
                 {barber && service && (
                   <div className="bg-barber-primary p-6 rounded-lg">
                     <img
-                      src={barber.kep}
+                      src={`http://localhost/project/src/imgs/${barber.kep}`}
                       alt={barber.nev}
                       className="w-full h-64 object-cover rounded-lg mb-4"
                     />
