@@ -14,7 +14,7 @@ export default function AppointmentHistory() {
 
       {error && <p className="text-red-400">{error}</p>}
 
-      <div className="max-h-[600px] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-barber-accent scrollbar-track-barber-primary">
+      <div className="max-h-[600px] overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-barber-accent scrollbar-track-barber-primary hover:scrollbar-thumb-barber-secondary">
         {appointments.map((appointment) => (
           <AppointmentCard key={appointment.id} appointment={appointment} />
         ))}

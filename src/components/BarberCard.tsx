@@ -111,7 +111,9 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
         <h3 className="text-xl font-serif mb-2 text-barber-accent">
           {barber.nev}
         </h3>
-        <p className="text-barber-light/80 mb-4">{barber.reszletek}</p>
+        <p className="text-barber-light/80 mb-4 whitespace-normal break-all">
+          {barber.reszletek}
+        </p>
         <div className="flex justify-between items-center mb-6 text-barber-secondary">
           <div className="flex items-center gap-1">
             <Clock size={16} />
@@ -129,7 +131,9 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
             className="flex items-center gap-2 text-barber-accent hover:text-barber-secondary mb-2"
           >
             <FaStar size={16} />
-            <span>Vélemények ({reviewCount})</span>
+            <span className="whitespace-normal break-all">
+              Vélemények ({reviewCount})
+            </span>
           </button>
 
           <div
@@ -146,11 +150,13 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
                     key={index}
                     className="text-barber-light/80 text-sm border-l-2 border-barber-accent pl-3"
                   >
-                    <p>{review.velemeny}</p>
+                    <p className="whitespace-normal break-all">
+                      {review.velemeny}
+                    </p>
                     <div className="flex items-center mt-1">
                       {renderStars(review.ertekeles)}
                     </div>
-                    <div className="text-xs text-barber-secondary mt-1">
+                    <div className="text-xs text-barber-secondary mt-1 whitespace-normal break-all">
                       {review.ertekelo_neve}
                     </div>
                   </div>
