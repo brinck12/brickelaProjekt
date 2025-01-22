@@ -15,6 +15,7 @@ import BookingForm from "./components/BookingForm";
 import AppointmentsPage from "./components/AppointmentsPage";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
+import BookingConfirmation from "./components/BookingConfirmation";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -57,6 +58,7 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path="/booking/confirmation" element={<BookingConfirmation />} />
       </Routes>
     </AnimatePresence>
   );

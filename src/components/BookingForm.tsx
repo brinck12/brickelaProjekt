@@ -185,7 +185,19 @@ export default function BookingForm() {
         time: formData.time,
         megjegyzes: formData.megjegyzes,
       });
-      navigate("/");
+      navigate("/booking/confirmation", {
+        state: {
+          booking: {
+            barberName: barber?.nev,
+            serviceName: service?.name,
+            date: formData.date,
+            time: formData.time,
+            service: {
+              duration: service?.duration,
+            },
+          },
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         alert(error.message);
