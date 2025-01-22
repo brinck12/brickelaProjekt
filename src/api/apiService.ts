@@ -1,48 +1,7 @@
 import axios, { AxiosError } from "axios";
-
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  appointments?: T extends Appointment[] ? Appointment[] : never;
-}
-
-interface LoginResponse {
-  token: string;
-  user: {
-    id: number;
-    Keresztnev: string;
-    Email: string;
-    Telefonszam: string;
-    Osztaly: string;
-  };
-}
-
-interface BookingData {
-  barberId: string | number;
-  serviceId: string | number;
-  date: string;
-  time: string;
-  userId?: number;
-  megjegyzes?: string;
-}
-
-export interface Appointment {
-  id: number;
-  date: string;
-  time: string;
-  status: "Foglalt" | "Teljesítve" | "Lemondva";
-  barberName: string;
-  service: string;
-  note?: string;
-}
-
-export interface Reference {
-  id: number;
-  image: string;
-  description?: string;
-  createdAt: string;
-}
+import { ApiResponse, LoginResponse, BookingData } from "../types/api";
+import { Appointment } from "../types/appointment";
+//import { Reference } from "../types/reference";
 
 export class ApiError extends Error {
   constructor(message: string, public statusCode?: number) {
