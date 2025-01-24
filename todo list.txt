@@ -1,6 +1,6 @@
 overall amugy csinalhatsz olyat hogy szebbe varazsolod a kinezetet ha nem tetszene
 
-az admin felhasznalo a csibrikgergo@gmail.com slime jelszoval, feltoltom a mostani sql adatbazist mert ott minden faszan mukodik most
+az admin felhasznalo a csibrikgergo@gmail.com slime jelszoval, feltoltom a mostani sql adatbazist (brickelacuts.sql) mert ott minden faszan mukodik most
 
 az admin dashboardra mehetne egy visszanyil a fooldalra szerintem mert fk it
 
