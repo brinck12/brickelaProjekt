@@ -1,34 +1,30 @@
-import { User, Mail, Phone } from "lucide-react";
+import { User, Mail, Phone, Edit, X } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import { updateUserData } from "../api/apiService";
-import { ApiError } from "../api/apiService";
 
 export default function AccountDetails() {
   const { user, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     Keresztnev: user?.Keresztnev || "",
+    Vezeteknev: user?.Vezeteknev || "",
     Email: user?.Email || "",
     Telefonszam: user?.Telefonszam || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isEditing) return;
+
     try {
-      const response = await updateUserData(formData);
-      if (response.data.success) {
-        setIsEditing(false);
-        await refreshUser();
-        alert("Adatok sikeresen frissítve!");
-      }
+      setError(null);
+      await updateUserData(formData);
+      await refreshUser();
+      setIsEditing(false);
     } catch (err) {
-      console.error("Error:", err);
-      if (err instanceof ApiError) {
-        alert(err.message);
-      } else {
-        alert("Hiba történt a mentés során.");
-      }
+      setError((err as Error).message);
     }
   };
 
@@ -46,28 +42,71 @@ export default function AccountDetails() {
   }
 
   return (
-    <div className="bg-barber-dark rounded-lg shadow-lg p-8">
-      <h2 className="text-2xl font-serif font-bold mb-6 text-barber-accent">
-        Fiókadatok
-      </h2>
+    <div className="bg-barber-dark rounded-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold text-barber-accent">
+          Személyes adatok
+        </h2>
+        <button
+          onClick={() => {
+            if (isEditing) {
+              setFormData({
+                Keresztnev: user?.Keresztnev || "",
+                Vezeteknev: user?.Vezeteknev || "",
+                Email: user?.Email || "",
+                Telefonszam: user?.Telefonszam || "",
+              });
+            }
+            setIsEditing(!isEditing);
+            setError(null);
+          }}
+          className="text-barber-accent hover:text-barber-secondary transition-colors"
+        >
+          {isEditing ? <X className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
+        </button>
+        console.log(user);
+      </div>
+
+      {error && (
+        <div className="mb-4 p-2 bg-red-500/10 border border-red-500 rounded text-red-500 text-sm">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center gap-3">
           <User className="w-5 h-5 text-barber-accent" />
-          <div className="flex-1">
-            <p className="text-sm text-barber-secondary">Név</p>
-            {isEditing ? (
-              <input
-                type="text"
-                value={formData.Keresztnev}
-                onChange={(e) =>
-                  setFormData({ ...formData, Keresztnev: e.target.value })
-                }
-                className="w-full bg-barber-primary text-barber-light p-1 rounded"
-              />
-            ) : (
-              <p className="text-barber-light">{user.Keresztnev}</p>
-            )}
+          <div className="flex-1 space-y-4">
+            <div>
+              <p className="text-sm text-barber-secondary">Vezetéknév</p>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.Vezeteknev}
+                  onChange={(e) =>
+                    setFormData({ ...formData, Vezeteknev: e.target.value })
+                  }
+                  className="w-full bg-barber-primary text-barber-light p-1 rounded"
+                />
+              ) : (
+                <p className="text-barber-light">{user.Vezeteknev}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-sm text-barber-secondary">Keresztnév</p>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={formData.Keresztnev}
+                  onChange={(e) =>
+                    setFormData({ ...formData, Keresztnev: e.target.value })
+                  }
+                  className="w-full bg-barber-primary text-barber-light p-1 rounded"
+                />
+              ) : (
+                <p className="text-barber-light">{user.Keresztnev}</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -104,34 +143,17 @@ export default function AccountDetails() {
                 className="w-full bg-barber-primary text-barber-light p-1 rounded"
               />
             ) : (
-              <p className="text-barber-light">{user.Telefonszam || "N/A"}</p>
+              <p className="text-barber-light">{user.Telefonszam}</p>
             )}
           </div>
         </div>
 
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="mt-6 w-full bg-barber-accent hover:bg-barber-secondary text-barber-primary py-2 rounded-lg transition-colors"
-            >
-              Mentés
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="mt-6 w-full bg-barber-primary hover:bg-barber-secondary text-barber-light py-2 rounded-lg transition-colors"
-            >
-              Mégse
-            </button>
-          </div>
-        ) : (
+        {isEditing && (
           <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="mt-6 w-full bg-barber-accent hover:bg-barber-secondary text-barber-primary py-2 rounded-lg transition-colors"
+            type="submit"
+            className="w-full bg-barber-accent hover:bg-barber-accent/90 text-barber-primary py-2 rounded transition-colors"
           >
-            Adatok szerkesztése
+            Mentés
           </button>
         )}
       </form>

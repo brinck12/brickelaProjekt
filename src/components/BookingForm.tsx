@@ -76,7 +76,7 @@ export default function BookingForm() {
     if (user) {
       setFormData((prev) => ({
         ...prev,
-        name: user.Keresztnev,
+        name: user.Vezeteknev + " " + user.Keresztnev,
         email: user.Email,
         phone: user.Telefonszam || "",
       }));
@@ -104,8 +104,8 @@ export default function BookingForm() {
               selectedBarber.endTime
             );
             const slots = generateTimeSlots(
-              parseInt(selectedBarber.startTime),
-              parseInt(selectedBarber.endTime)
+              parseInt(selectedBarber.KezdesIdo),
+              parseInt(selectedBarber.BefejezesIdo)
             );
             console.log("Generated time slots:", slots);
             setTimeSlots(slots);

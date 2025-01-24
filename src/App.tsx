@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,6 +17,8 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import BookingConfirmation from "./components/BookingConfirmation";
 import AdminDashboard from "./components/admin/AdminDashboard";
+import { ManageBarbers } from "./components/admin/ManageBarbers";
+import { ManageServices } from "./components/admin/ManageServices";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -68,6 +69,22 @@ function AnimatedRoutes() {
           element={
             <AdminRoute>
               <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/barbers"
+          element={
+            <AdminRoute>
+              <ManageBarbers />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/services"
+          element={
+            <AdminRoute>
+              <ManageServices />
             </AdminRoute>
           }
         />

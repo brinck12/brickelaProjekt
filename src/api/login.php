@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'user' => [
                 'id' => $user['UgyfelID'],
                 'Keresztnev' => $user['Keresztnev'],
+                'Vezeteknev' => $user['Vezeteknev'],
                 'Email' => $user['Email'],
                 'Telefonszam' => $user['Telefonszam'],
                 'Osztaly' => $user['Osztaly']

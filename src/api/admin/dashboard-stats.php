@@ -5,12 +5,12 @@ header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
 
+require_once '../config.php';
+require_once '../middleware/auth.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
-
-require_once '../config.php';
-require_once '../middleware/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
@@ -33,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $totalAppointments = $stmt->get_result()->fetch_assoc()['total'];
 
         // Get today's appointments
-        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM foglalasok WHERE DATE(FoglalasDatum) = CURDATE()");
+        $stmt = $conn->prepare("SELECT COUNT(*) as today FROM foglalasok WHERE DATE(FoglalasDatum) = CURDATE()");
         $stmt->execute();
-        $todayAppointments = $stmt->get_result()->fetch_assoc()['total'];
+        $todayAppointments = $stmt->get_result()->fetch_assoc()['today'];
 
         // Get total customers
         $stmt = $conn->prepare("SELECT COUNT(*) as total FROM ugyfelek WHERE Osztaly = 'Felhasználó'");
@@ -47,18 +47,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt->execute();
         $totalBarbers = $stmt->get_result()->fetch_assoc()['total'];
 
-        // Get recent appointments
+        // Get recent appointments with customer and barber names
         $stmt = $conn->prepare("
             SELECT 
                 f.FoglalasID as id,
-                CONCAT(u.Keresztnev, ' ', u.Vezeteknev) as customerName,
-                s.SzolgaltatasNev as service,
-                DATE_FORMAT(f.FoglalasDatum, '%Y-%m-%d') as date,
-                TIME_FORMAT(f.FoglalasIdo, '%H:%i') as time,
-                f.Allapot as status
+                CONCAT(u.Vezeteknev, ' ', u.Keresztnev) as customerName,
+                sz.SzolgaltatasNev as service,
+                f.FoglalasDatum as date,
+                f.FoglalasIdo as time,
+                f.Allapot as status,
+                f.Megjegyzes as note,
+                fo.FodraszID as barberId,
+                CONCAT(fo.Vezeteknev, ' ', fo.Keresztnev) as barberName
             FROM foglalasok f
             JOIN ugyfelek u ON f.UgyfelID = u.UgyfelID
-            JOIN szolgaltatasok s ON f.SzolgaltatasID = s.SzolgaltatasID
+            JOIN szolgaltatasok sz ON f.SzolgaltatasID = sz.SzolgaltatasID
+            JOIN fodraszok fo ON f.FodraszID = fo.FodraszID
             ORDER BY f.FoglalasDatum DESC, f.FoglalasIdo DESC
             LIMIT 10
         ");
@@ -68,10 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo json_encode([
             'success' => true,
             'stats' => [
-                'totalAppointments' => (int)$totalAppointments,
-                'todayAppointments' => (int)$todayAppointments,
-                'totalCustomers' => (int)$totalCustomers,
-                'totalBarbers' => (int)$totalBarbers
+                'totalAppointments' => $totalAppointments,
+                'todayAppointments' => $todayAppointments,
+                'totalCustomers' => $totalCustomers,
+                'totalBarbers' => $totalBarbers
             ],
             'recentAppointments' => $recentAppointments
         ]);

@@ -14,6 +14,9 @@ export interface Appointment {
   Allapot: "Foglalt" | "Teljesítve" | "Lemondva";
   Megjegyzes?: string;
   LetrehozasIdopontja: string;
+  barberId: number;
+  serviceId: number;
+  userId: number;
 }
 
 export interface AppointmentCreation {
@@ -28,4 +31,16 @@ export interface AppointmentAvailability {
   date: string;
   barberId: number;
   availableSlots: string[];
+}
+
+export interface RecentAppointment {
+  id: number;
+  customerName: string;
+  service: string;
+  date: string;
+  time: string;
+  status: string;
+  note?: string;
+  barberId?: number;
+  barberName?: string;
 }

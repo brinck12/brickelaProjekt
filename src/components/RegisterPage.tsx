@@ -10,7 +10,8 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
+    keresztnev: "",
+    vezeteknev: "",
     email: "",
     telefonszam: "",
     password: "",
@@ -35,7 +36,8 @@ export default function RegisterPage() {
       const response = await register(
         formData.email,
         formData.password,
-        formData.name,
+        formData.keresztnev,
+        formData.vezeteknev,
         formData.telefonszam
       );
 
@@ -82,10 +84,19 @@ export default function RegisterPage() {
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <FormInput
-                  label="Teljes név"
+                  label="Vezetéknév"
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="vezeteknev"
+                  value={formData.vezeteknev}
+                  onChange={handleChange}
+                  required
+                />
+
+                <FormInput
+                  label="Keresztnév"
+                  type="text"
+                  name="keresztnev"
+                  value={formData.keresztnev}
                   onChange={handleChange}
                   required
                 />

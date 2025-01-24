@@ -24,7 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if ($result) {
             echo json_encode([
                 'id' => $result['UgyfelID'],
-                'Nev' => $result['Vezeteknev'] . " " . $result['Keresztnev'],
+                'Vezeteknev' => $result['Vezeteknev'],
+                'Keresztnev' => $result['Keresztnev'],
                 'Email' => $result['Email'],
                 'Telefonszam' => $result['Telefonszam'],
                 'Osztaly' => $result['Osztaly']

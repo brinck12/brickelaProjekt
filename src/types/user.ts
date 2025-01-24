@@ -22,6 +22,7 @@ export interface UserRegistrationData {
 
 export interface UserUpdateData {
   Keresztnev: string;
+  Vezeteknev: string;
   Email: string;
   Telefonszam: string;
 }

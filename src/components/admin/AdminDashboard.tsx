@@ -1,6 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Users, Scissors } from "lucide-react";
-import { fetchDashboardStats } from "../../api/apiService";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Scissors,
+  UserPlus,
+  Settings,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { fetchDashboardStats, updateAppointment } from "../../api/apiService";
+import { RecentAppointment } from "../../types/appointment";
+import { AppointmentTable } from "./AppointmentTable";
+import { ViewAppointmentModal } from "./ViewAppointmentModal";
+import { EditAppointmentModal } from "./EditAppointmentModal";
+import { DashboardHeader } from "./DashboardHeader";
+import { StatCard } from "./StatCard";
 
 interface DashboardStats {
   totalAppointments: number;
@@ -9,16 +23,8 @@ interface DashboardStats {
   totalBarbers: number;
 }
 
-interface RecentAppointment {
-  id: number;
-  customerName: string;
-  service: string;
-  date: string;
-  time: string;
-  status: string;
-}
-
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalAppointments: 0,
     todayAppointments: 0,
@@ -30,10 +36,33 @@ export default function AdminDashboard() {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<RecentAppointment | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    date: "",
+    time: "",
+    status: "",
+    note: "",
+  });
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+
+    // Set up auto-refresh if enabled
+    let intervalId: NodeJS.Timeout;
+    if (autoRefresh) {
+      intervalId = setInterval(fetchDashboardData, 30000); // Refresh every 30 seconds
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [autoRefresh]);
 
   const fetchDashboardData = async () => {
     try {
@@ -47,6 +76,49 @@ export default function AdminDashboard() {
       setError("Failed to fetch dashboard data. Please try again later.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Filter and search appointments
+  const filteredAppointments = useMemo(() => {
+    return recentAppointments.filter((appointment) => {
+      const matchesSearch =
+        appointment.customerName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" ||
+        appointment.status.toLowerCase() === statusFilter.toLowerCase();
+      return matchesSearch && matchesStatus;
+    });
+  }, [recentAppointments, searchTerm, statusFilter]);
+
+  const handleViewAppointment = (appointment: RecentAppointment) => {
+    setSelectedAppointment(appointment);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditAppointment = (appointment: RecentAppointment) => {
+    setSelectedAppointment(appointment);
+    setEditForm({
+      date: appointment.date,
+      time: appointment.time,
+      status: appointment.status,
+      note: appointment.note || "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      await updateAppointment(selectedAppointment.id, editForm);
+      await fetchDashboardData();
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error updating appointment:", error);
     }
   };
 
@@ -75,11 +147,30 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-barber-primary">
       <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-barber-accent mb-8">
-          Admin Dashboard
-        </h1>
+        <DashboardHeader
+          autoRefresh={autoRefresh}
+          onAutoRefreshToggle={() => setAutoRefresh(!autoRefresh)}
+          onManualRefresh={fetchDashboardData}
+        />
 
-        {/* Statistics Cards */}
+        {/* Admin Navigation */}
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <button
+            onClick={() => navigate("/admin/barbers")}
+            className="flex items-center justify-center gap-3 p-4 bg-barber-dark rounded-lg text-barber-accent hover:bg-barber-dark/80 transition-colors"
+          >
+            <UserPlus className="w-6 h-6" />
+            Manage Barbers
+          </button>
+          <button
+            onClick={() => navigate("/admin/services")}
+            className="flex items-center justify-center gap-3 p-4 bg-barber-dark rounded-lg text-barber-accent hover:bg-barber-dark/80 transition-colors"
+          >
+            <Settings className="w-6 h-6" />
+            Manage Services
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Appointments"
@@ -103,80 +194,32 @@ export default function AdminDashboard() {
           />
         </div>
 
-        {/* Recent Appointments */}
-        <div className="bg-barber-dark rounded-lg p-6 shadow-lg">
-          <h2 className="text-xl font-semibold text-barber-accent mb-4">
-            Recent Appointments
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-barber-light border-b border-barber-secondary/20">
-                  <th className="pb-4">Customer</th>
-                  <th className="pb-4">Service</th>
-                  <th className="pb-4">Date</th>
-                  <th className="pb-4">Time</th>
-                  <th className="pb-4">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentAppointments.map((appointment) => (
-                  <tr
-                    key={appointment.id}
-                    className="text-barber-light border-b border-barber-secondary/10 last:border-0"
-                  >
-                    <td className="py-3">{appointment.customerName}</td>
-                    <td className="py-3">{appointment.service}</td>
-                    <td className="py-3">{appointment.date}</td>
-                    <td className="py-3">{appointment.time}</td>
-                    <td className="py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          appointment.status === "Completed"
-                            ? "bg-green-500/20 text-green-500"
-                            : appointment.status === "Pending"
-                            ? "bg-yellow-500/20 text-yellow-500"
-                            : "bg-red-500/20 text-red-500"
-                        }`}
-                      >
-                        {appointment.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {recentAppointments.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-4 text-center text-barber-light"
-                    >
-                      No recent appointments
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+        <AppointmentTable
+          appointments={filteredAppointments}
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          onSearchChange={setSearchTerm}
+          onStatusFilterChange={setStatusFilter}
+          onViewAppointment={handleViewAppointment}
+          onEditAppointment={handleEditAppointment}
+        />
 
-interface StatCardProps {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}
+        {isViewModalOpen && selectedAppointment && (
+          <ViewAppointmentModal
+            appointment={selectedAppointment}
+            onClose={() => setIsViewModalOpen(false)}
+          />
+        )}
 
-function StatCard({ title, value, icon }: StatCardProps) {
-  return (
-    <div className="bg-barber-dark rounded-lg p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-barber-light">{title}</h3>
-        {icon}
+        {isEditModalOpen && selectedAppointment && (
+          <EditAppointmentModal
+            formData={editForm}
+            onFormChange={(data) => setEditForm({ ...editForm, ...data })}
+            onSave={handleUpdateAppointment}
+            onClose={() => setIsEditModalOpen(false)}
+          />
+        )}
       </div>
-      <p className="text-3xl font-bold text-barber-accent">{value}</p>
     </div>
   );
 }

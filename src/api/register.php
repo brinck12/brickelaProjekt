@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Input validation
-        if (!isset($data['email'], $data['password'], $data['name'], $data['telefonszam'])) {
+        if (!isset($data['email'], $data['password'], $data['keresztnev'], $data['vezeteknev'], $data['telefonszam'])) {
             throw new Exception('Missing required fields');
         }
 
@@ -32,8 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Password must be at least 8 characters long');
         }
 
-        if (empty($data['name']) || strlen($data['name']) < 2) {
-            throw new Exception('Name is required and must be at least 2 characters');
+        if (empty($data['keresztnev']) || strlen($data['keresztnev']) < 2) {
+            throw new Exception('First name is required and must be at least 2 characters');
+        }
+
+        if (empty($data['vezeteknev']) || strlen($data['vezeteknev']) < 2) {
+            throw new Exception('Last name is required and must be at least 2 characters');
         }
 
         if (empty($data['telefonszam']) || !preg_match('/^[0-9+\-\s()]{6,20}$/', $data['telefonszam'])) {
@@ -41,10 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Prepare data
-        $name = $data['name'];
-        $name_parts = explode(' ', $name);
-        $vezeteknev = $name_parts[0];
-        $keresztnev = isset($name_parts[1]) ? $name_parts[1] : '';
+        $keresztnev = $data['keresztnev'];
+        $vezeteknev = $data['vezeteknev'];
         $email = $data['email'];
         $telefonszam = $data['telefonszam'];
         $password = password_hash($data['password'], PASSWORD_BCRYPT);

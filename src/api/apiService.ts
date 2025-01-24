@@ -109,30 +109,30 @@ export const fetchUserData = async () => {
   }
 };
 
-export const updateUserData = async (userData: {
+export async function updateUserData(data: {
   Keresztnev: string;
+  Vezeteknev: string;
   Email: string;
   Telefonszam: string;
-}): Promise<{ data: { success: boolean; message: string } }> => {
+}) {
   try {
-    const response = await apiClient.post<{
-      success: boolean;
-      message: string;
-    }>("/adatvaltoztatas.php", userData);
+    const response = await apiClient.post("/adatvaltoztatas.php", data);
     if (!response.data.success) {
-      throw new ApiError(response.data.message || "Failed to update user data");
+      throw new ApiError(
+        response.data.message || "Hiba történt az adatok frissítése során"
+      );
     }
-    return response;
+    return response.data;
   } catch (error) {
     handleApiError(error);
-    throw error;
   }
-};
+}
 
 export const register = async (
   email: string,
   password: string,
-  name: string,
+  keresztnev: string,
+  vezeteknev: string,
   telefonszam: string
 ): Promise<{ data: { success: boolean; message: string } }> => {
   try {
@@ -142,7 +142,8 @@ export const register = async (
     }>("/register.php", {
       email,
       password,
-      name,
+      keresztnev,
+      vezeteknev,
       telefonszam,
     });
     return response;
@@ -156,8 +157,119 @@ export const fetchBarbers = () => {
   return apiClient.get("/barbers.php");
 };
 
+export const addBarber = async (formData: FormData) => {
+  try {
+    const response = await apiClient.post("/admin/add-barber.php", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to add barber");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const deleteBarber = async (barberId: number) => {
+  try {
+    const response = await apiClient.post("/admin/delete-barber.php", {
+      barberId,
+    });
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to delete barber");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const updateBarber = async (barberId: number, formData: FormData) => {
+  formData.append("barberId", barberId.toString());
+  try {
+    const response = await apiClient.post(
+      "/admin/update-barber.php",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to update barber");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
 export const fetchServices = () => {
   return apiClient.get("/services.php");
+};
+
+export const addService = async (data: {
+  name: string;
+  price: number;
+  duration: number;
+  description?: string;
+}) => {
+  try {
+    const response = await apiClient.post("/admin/add-service.php", data);
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to add service");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const updateService = async (
+  serviceId: number,
+  data: {
+    name: string;
+    price: number;
+    duration: number;
+    description?: string;
+  }
+) => {
+  try {
+    const response = await apiClient.post("/admin/update-service.php", {
+      serviceId,
+      ...data,
+    });
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to update service");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const deleteService = async (serviceId: number) => {
+  try {
+    const response = await apiClient.post("/admin/delete-service.php", {
+      serviceId,
+    });
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to delete service");
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
 };
 
 export const checkAppointments = (barberId: string | number, date: string) => {
@@ -213,6 +325,34 @@ export const fetchDashboardStats = async () => {
         response.data.message || "Failed to fetch dashboard stats"
       );
     }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const updateAppointment = async (
+  appointmentId: number,
+  data: {
+    date: string;
+    time: string;
+    status: string;
+    note: string;
+  }
+) => {
+  try {
+    const response = await apiClient.post("/update-appointment.php", {
+      appointmentId,
+      ...data,
+    });
+
+    if (!response.data.success) {
+      throw new ApiError(
+        response.data.message || "Failed to update appointment"
+      );
+    }
+
     return response.data;
   } catch (error) {
     handleApiError(error);

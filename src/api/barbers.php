@@ -25,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'evtapasztalat' => $row['evtapasztalat'],
                 'specializacio' => $row['specializacio'],
                 'reszletek' => $row['reszletek'],
-                'startTime' => intval($row['KezdesIdo']),
-                'endTime' => intval($row['BefejezesIdo'])
+                'KezdesIdo' => intval($row['KezdesIdo']),
+                'BefejezesIdo' => intval($row['BefejezesIdo'])
             ];
         }
         
