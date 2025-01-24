@@ -80,10 +80,21 @@ export default function Navbar() {
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-barber-dark rounded-lg shadow-lg py-2 z-[100]">
-                  {user?.Osztaly === "admin" && (
-                    <div className="px-4 py-2 text-sm text-barber-accent border-b border-barber-secondary/20">
-                      Admin fiók
-                    </div>
+                  {user?.Osztaly === "Adminisztrátor" && (
+                    <>
+                      <div className="px-4 py-2 text-sm text-barber-accent border-b border-barber-secondary/20">
+                        Admin fiók
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigate("/admin");
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-barber-primary text-barber-accent"
+                      >
+                        Admin Dashboard
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={() => {
@@ -174,7 +185,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <div className="flex flex-col items-center space-y-4">
                 <hr className="border-slate-800 w-full mb-4" />
-                {user?.Osztaly === "admin" && (
+                {user?.Osztaly === "Adminisztrátor" && (
                   <div className="text-sm text-indigo-400">Admin fiók</div>
                 )}
                 <button

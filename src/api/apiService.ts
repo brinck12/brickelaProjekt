@@ -204,3 +204,18 @@ export const fetchAppointments = async (): Promise<Appointment[]> => {
 export const fetchReferences = (barberId: number) => {
   return apiClient.post("/get-references.php", { barberId });
 };
+
+export const fetchDashboardStats = async () => {
+  try {
+    const response = await apiClient.get("/admin/dashboard-stats.php");
+    if (!response.data.success) {
+      throw new ApiError(
+        response.data.message || "Failed to fetch dashboard stats"
+      );
+    }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};

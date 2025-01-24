@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Home } from "lucide-react";
 import { BookingDetails } from "../types/bookingdetails";

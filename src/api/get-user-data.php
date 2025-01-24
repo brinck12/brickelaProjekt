@@ -15,7 +15,7 @@ require_once 'middleware/auth.php';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $decoded = verifyToken();
-        $sql = "SELECT UgyfelID, Keresztnev, Email, Telefonszam, Osztaly FROM ugyfelek WHERE UgyfelID = ?";
+        $sql = "SELECT UgyfelID, Vezeteknev, Keresztnev, Email, Telefonszam, Osztaly FROM ugyfelek WHERE UgyfelID = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $decoded->user_id);
         $stmt->execute();
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if ($result) {
             echo json_encode([
                 'id' => $result['UgyfelID'],
-                'Keresztnev' => $result['Keresztnev'],
+                'Nev' => $result['Vezeteknev'] . " " . $result['Keresztnev'],
                 'Email' => $result['Email'],
                 'Telefonszam' => $result['Telefonszam'],
                 'Osztaly' => $result['Osztaly']

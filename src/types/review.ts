@@ -1,9 +1,15 @@
 export interface Review {
+  barberId: number;
   id: number;
-  velemeny: string;
+  foglalasId: number;
   ertekeles: number;
-  datum: string;
-  ugyfel_id: number;
-  fodrasz_id: number;
-  ertekelo_neve: string;
+  velemeny?: string;
+  letrehozasIdopontja: string;
+  ertekelo_neve?: string;
+}
+
+export interface ReviewSubmission {
+  foglalasId: number;
+  ertekeles: number;
+  velemeny?: string;
 }

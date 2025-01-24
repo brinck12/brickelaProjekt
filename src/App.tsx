@@ -8,6 +8,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import HomePage from "./components/HomePage";
 import ServiceSelection from "./components/ServiceSelection";
 import BarberSelection from "./components/BarberSelection";
@@ -16,6 +17,7 @@ import AppointmentsPage from "./components/AppointmentsPage";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import BookingConfirmation from "./components/BookingConfirmation";
+import AdminDashboard from "./components/admin/AdminDashboard";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -59,6 +61,16 @@ function AnimatedRoutes() {
           }
         />
         <Route path="/booking/confirmation" element={<BookingConfirmation />} />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );

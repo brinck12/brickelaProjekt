@@ -5,6 +5,16 @@ export interface Barber {
   evtapasztalat: string;
   specializacio: string;
   reszletek: string;
-  startTime: number; // Starting hour (e.g., 8 for 8 AM)
-  endTime: number; // Ending hour (e.g., 16 for 4 PM)
+  startTime: string;
+  endTime: string;
+  Keresztnev: string;
+  Vezeteknev: string;
+  KezdesIdo: string;
+  BefejezesIdo: string;
+}
+
+export interface BarberSchedule {
+  startTime: string;
+  endTime: string;
+  bookedTimes: string[];
 }

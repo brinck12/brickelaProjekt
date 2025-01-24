@@ -4,13 +4,7 @@ import { useState, useEffect } from "react";
 import { Barber } from "../types/barber";
 import { fetchReviews, fetchReferences } from "../api/apiService";
 import { Review } from "../types/review";
-
-interface Reference {
-  id: number;
-  image: string;
-  description?: string;
-  createdAt: string;
-}
+import { Reference } from "../types/reference";
 
 interface BarberCardProps {
   barber: Barber;
@@ -42,7 +36,7 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
     };
 
     getReviewCount();
-  }, []);
+  }, [barber.id]);
 
   useEffect(() => {
     if (showReviews) {

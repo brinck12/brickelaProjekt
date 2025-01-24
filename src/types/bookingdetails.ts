@@ -5,5 +5,8 @@ export interface BookingDetails {
   time: string;
   service?: {
     duration?: number;
+    price?: number;
+    name?: string;
   };
+  megjegyzes?: string;
 }
