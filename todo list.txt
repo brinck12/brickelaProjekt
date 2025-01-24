@@ -1,0 +1,13 @@
+overall amugy csinalhatsz olyat hogy szebbe varazsolod a kinezetet ha nem tetszene
+
+az admin felhasznalo a csibrikgergo@gmail.com slime jelszoval, feltoltom a mostani sql adatbazist mert ott minden faszan mukodik most
+
+az admin dashboardra mehetne egy visszanyil a fooldalra szerintem mert fk it
+
+az admin dashboardon van a manage barbers meg manage services, az ottani funkciokat megcsinalhatod normalisan, az edit fulon a barbereknel a kezdes meg a befejezesi idot valahogy normalisabban megcsinalni hogy ne lehessen percet is allitani mert azt mi a fasznak. meg amugy a torlest kipofozhatod es hogy mind a ket gomb mukodjon faszan. meg kene egy visszanyil az admin dashboardra.
+
+ami meg eszedbe jut es jo featurenek gondolod azt belerakhatod, peldaul durroghatnak a transitionok az oldalra mindenfele mennyisegben
+
+nagyjabol az admin dashboard a nagy prio tobbi funkcio nagyon szepen mukodik
+
+kitartast es jo munkat twin
