@@ -25,7 +25,7 @@ export function EditAppointmentModal({
       <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-barber-accent">
-            Edit Appointment
+            Foglalás szerkesztése
           </h3>
           <button
             onClick={onClose}
@@ -36,7 +36,9 @@ export function EditAppointmentModal({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-barber-light text-sm block mb-1">Date</label>
+            <label className="text-barber-light text-sm block mb-1">
+              Dátum
+            </label>
             <input
               type="date"
               value={formData.date}
@@ -45,7 +47,9 @@ export function EditAppointmentModal({
             />
           </div>
           <div>
-            <label className="text-barber-light text-sm block mb-1">Time</label>
+            <label className="text-barber-light text-sm block mb-1">
+              Időpont
+            </label>
             <input
               type="time"
               value={formData.time}
@@ -55,7 +59,7 @@ export function EditAppointmentModal({
           </div>
           <div>
             <label className="text-barber-light text-sm block mb-1">
-              Status
+              Státusz
             </label>
             <select
               value={formData.status}
@@ -68,7 +72,9 @@ export function EditAppointmentModal({
             </select>
           </div>
           <div>
-            <label className="text-barber-light text-sm block mb-1">Note</label>
+            <label className="text-barber-light text-sm block mb-1">
+              Megjegyzés
+            </label>
             <textarea
               value={formData.note}
               onChange={(e) => onFormChange({ note: e.target.value })}
@@ -81,13 +87,13 @@ export function EditAppointmentModal({
               onClick={onClose}
               className="px-4 py-2 rounded bg-barber-primary text-white hover:bg-barber-primary/90 transition-colors"
             >
-              Cancel
+              Mégsem
             </button>
             <button
               onClick={onSave}
               className="px-4 py-2 rounded bg-barber-accent text-white hover:bg-barber-accent/90 transition-colors"
             >
-              Save Changes
+              Változtatások mentése
             </button>
           </div>
         </div>

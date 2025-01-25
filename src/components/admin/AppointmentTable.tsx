@@ -66,7 +66,7 @@ export function AppointmentTable({
             onChange={(e) => onStatusFilterChange(e.target.value)}
             className="px-4 py-2 rounded bg-barber-primary text-barber-light focus:outline-none focus:ring-2 focus:ring-barber-accent"
           >
-            <option value="all">All Status</option>
+            <option value="all">Összes</option>
             <option value="teljesítve">Teljesítve</option>
             <option value="foglalt">Foglalt</option>
             <option value="lemondva">Lemondva</option>
@@ -85,12 +85,11 @@ export function AppointmentTable({
         <table className="w-full">
           <thead>
             <tr className="text-left text-barber-light border-b border-barber-secondary/20">
-              <th className="pb-4">Customer</th>
-              <th className="pb-4">Service</th>
-              <th className="pb-4">Date</th>
-              <th className="pb-4">Time</th>
-              <th className="pb-4">Status</th>
-              <th className="pb-4">Actions</th>
+              <th className="pb-4">Ügyfél</th>
+              <th className="pb-4">Szolgáltatás</th>
+              <th className="pb-4">Dátum</th>
+              <th className="pb-4">Időpont</th>
+              <th className="pb-4">Státusz</th>
             </tr>
           </thead>
           <tbody>
@@ -122,13 +121,13 @@ export function AppointmentTable({
                       onClick={() => onViewAppointment(appointment)}
                       className="px-3 py-1 text-sm rounded bg-barber-accent text-white hover:bg-barber-accent/90 transition-colors"
                     >
-                      View
+                      Részletek
                     </button>
                     <button
                       onClick={() => onEditAppointment(appointment)}
                       className="px-3 py-1 text-sm rounded bg-barber-secondary text-white hover:bg-barber-secondary/90 transition-colors"
                     >
-                      Edit
+                      Szerkesztés
                     </button>
                   </div>
                 </td>

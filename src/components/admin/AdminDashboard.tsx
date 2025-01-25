@@ -6,6 +6,7 @@ import {
   Scissors,
   UserPlus,
   Settings,
+  ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fetchDashboardStats, updateAppointment } from "../../api/apiService";
@@ -72,8 +73,10 @@ export default function AdminDashboard() {
       setStats(response.stats);
       setRecentAppointments(response.recentAppointments);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      setError("Failed to fetch dashboard data. Please try again later.");
+      console.error("Hiba történt az adatok betöltésekor:", error);
+      setError(
+        "Nem sikerült betölteni az adatokat. Kérjük, próbálja újra később."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +121,7 @@ export default function AdminDashboard() {
       await fetchDashboardData();
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error("Error updating appointment:", error);
+      console.error("Hiba történt a foglalás frissítésekor:", error);
     }
   };
 
@@ -147,6 +150,14 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-barber-primary">
       <div className="p-6 max-w-7xl mx-auto">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 text-barber-accent hover:text-barber-accent/80 transition-colors mb-6"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Vissza a főoldalra
+        </button>
+
         <DashboardHeader
           autoRefresh={autoRefresh}
           onAutoRefreshToggle={() => setAutoRefresh(!autoRefresh)}
@@ -160,35 +171,35 @@ export default function AdminDashboard() {
             className="flex items-center justify-center gap-3 p-4 bg-barber-dark rounded-lg text-barber-accent hover:bg-barber-dark/80 transition-colors"
           >
             <UserPlus className="w-6 h-6" />
-            Manage Barbers
+            Fodrászok kezelése
           </button>
           <button
             onClick={() => navigate("/admin/services")}
             className="flex items-center justify-center gap-3 p-4 bg-barber-dark rounded-lg text-barber-accent hover:bg-barber-dark/80 transition-colors"
           >
             <Settings className="w-6 h-6" />
-            Manage Services
+            Szolgáltatások kezelése
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
-            title="Total Appointments"
+            title="Összes foglalás"
             value={stats.totalAppointments}
             icon={<Calendar className="w-8 h-8 text-barber-accent" />}
           />
           <StatCard
-            title="Today's Appointments"
+            title="Mai foglalások"
             value={stats.todayAppointments}
             icon={<Clock className="w-8 h-8 text-barber-accent" />}
           />
           <StatCard
-            title="Total Customers"
+            title="Összes vendég"
             value={stats.totalCustomers}
             icon={<Users className="w-8 h-8 text-barber-accent" />}
           />
           <StatCard
-            title="Active Barbers"
+            title="Aktív fodrászok"
             value={stats.totalBarbers}
             icon={<Scissors className="w-8 h-8 text-barber-accent" />}
           />
