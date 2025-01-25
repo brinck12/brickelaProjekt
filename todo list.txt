@@ -1,3 +1,6 @@
+## TODO LIST 2025-01-25
+
+
 overall amugy csinalhatsz olyat hogy szebbe varazsolod a kinezetet ha nem tetszene
 
 az admin felhasznalo a csibrikgergo@gmail.com slime jelszoval, feltoltom a mostani sql adatbazist (brickelacuts.sql) mert ott minden faszan mukodik most
@@ -16,3 +19,11 @@ ami meg eszedbe jut es jo featurenek gondolod azt belerakhatod, peldaul durrogha
 nagyjabol az admin dashboard a nagy prio tobbi funkcio nagyon szepen mukodik
 
 kitartast es jo munkat twin
+
+## 2025-01-26
+
+vissznyilak kipipalva nagyon kiralyul, majd meg kell nezni hogy mukszik a transition az oldalak kozott, mert van ahol nincs.
+
+torlest akkor at kell gondolni, valami aktiv allapotra gondoltam eloszor az adatbazisban, de az is mukdone nekem hogy gombnyomasra kitorlom a gecibe mert fk.
+
+admin dashboard logikanak ugy kene kineznie akkor, hogy lehetne peldaul harom osztaly: felhasznalo, admin, barber. a barberek lathatnak az admin feluleleten a sajat cuccukat, az admin meg mindent? ebbe bele tartozna a ket manage gomb is, a barbereknek meg a sajat foglalasai, es egy szabadsag hozzaadas.
