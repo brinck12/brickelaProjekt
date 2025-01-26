@@ -18,8 +18,7 @@ export function ManageBarbers() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    email: "",
     experience: "",
     specialization: "",
     details: "",
@@ -55,8 +54,7 @@ export function ManageBarbers() {
   const handleEditBarber = (barber: Barber) => {
     setSelectedBarber(barber);
     setFormData({
-      firstName: barber.Keresztnev || "",
-      lastName: barber.Vezeteknev || "",
+      email: barber.email || "",
       experience: barber.evtapasztalat || "",
       specialization: barber.specializacio || "",
       details: barber.reszletek || "",
@@ -74,8 +72,7 @@ export function ManageBarbers() {
       if (selectedImage) {
         formDataToSend.append("image", selectedImage);
       }
-      formDataToSend.append("firstName", formData.firstName);
-      formDataToSend.append("lastName", formData.lastName);
+      formDataToSend.append("email", formData.email);
       formDataToSend.append("experience", formData.experience);
       formDataToSend.append("specialization", formData.specialization);
       formDataToSend.append("details", formData.details);
@@ -101,8 +98,7 @@ export function ManageBarbers() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("image", selectedImage);
-      formDataToSend.append("firstName", formData.firstName);
-      formDataToSend.append("lastName", formData.lastName);
+      formDataToSend.append("email", formData.email);
       formDataToSend.append("experience", formData.experience);
       formDataToSend.append("specialization", formData.specialization);
       formDataToSend.append("details", formData.details);
@@ -113,8 +109,7 @@ export function ManageBarbers() {
       await loadBarbers();
       setIsAddModalOpen(false);
       setFormData({
-        firstName: "",
-        lastName: "",
+        email: "",
         experience: "",
         specialization: "",
         details: "",
@@ -270,36 +265,22 @@ export function ManageBarbers() {
                       </label>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-barber-light text-sm block mb-1">
-                        First Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.firstName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            firstName: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 rounded bg-barber-primary text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-barber-light text-sm block mb-1">
-                        Last Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.lastName}
-                        onChange={(e) =>
-                          setFormData({ ...formData, lastName: e.target.value })
-                        }
-                        className="w-full px-3 py-2 rounded bg-barber-primary text-white"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-barber-light text-sm block mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                      placeholder="Enter registered user's email"
+                    />
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
@@ -433,15 +414,15 @@ export function ManageBarbers() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        First Name
+                        Email
                       </label>
                       <input
-                        type="text"
-                        value={formData.firstName}
+                        type="email"
+                        value={formData.email}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            firstName: e.target.value,
+                            email: e.target.value,
                           })
                         }
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
@@ -449,30 +430,20 @@ export function ManageBarbers() {
                     </div>
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        Last Name
+                        Experience (years)
                       </label>
                       <input
-                        type="text"
-                        value={formData.lastName}
+                        type="number"
+                        value={formData.experience}
                         onChange={(e) =>
-                          setFormData({ ...formData, lastName: e.target.value })
+                          setFormData({
+                            ...formData,
+                            experience: e.target.value,
+                          })
                         }
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-barber-light text-sm block mb-1">
-                      Experience (years)
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.experience}
-                      onChange={(e) =>
-                        setFormData({ ...formData, experience: e.target.value })
-                      }
-                      className="w-full px-3 py-2 rounded bg-barber-primary text-white"
-                    />
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">

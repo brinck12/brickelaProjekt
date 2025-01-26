@@ -1,11 +1,11 @@
 export interface User {
   id: number;
+  email: string;
   Keresztnev: string;
   Vezeteknev: string;
-  Email: string;
   Telefonszam: string;
-  Osztaly: "Adminisztrátor" | "Felhasználó";
-  RegisztracioIdopontja: string;
+  Osztaly: "Adminisztrátor" | "Felhasználó" | "Barber";
+  UgyfelID: number;
 }
 
 export interface AuthState {
@@ -21,6 +21,13 @@ export interface UserRegistrationData {
 }
 
 export interface UserUpdateData {
+  Keresztnev: string;
+  Vezeteknev: string;
+  Email: string;
+  Telefonszam: string;
+}
+
+export interface UserData {
   Keresztnev: string;
   Vezeteknev: string;
   Email: string;

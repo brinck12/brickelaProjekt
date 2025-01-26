@@ -8,6 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import BarberRoute from "./components/barber/BarberRoute";
 import HomePage from "./components/HomePage";
 import ServiceSelection from "./components/ServiceSelection";
 import BarberSelection from "./components/BarberSelection";
@@ -19,6 +20,7 @@ import BookingConfirmation from "./components/BookingConfirmation";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import { ManageBarbers } from "./components/admin/ManageBarbers";
 import { ManageServices } from "./components/admin/ManageServices";
+import BarberDashboard from "./components/barber/BarberDashboard";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -86,6 +88,16 @@ function AnimatedRoutes() {
             <AdminRoute>
               <ManageServices />
             </AdminRoute>
+          }
+        />
+
+        {/* Barber Routes */}
+        <Route
+          path="/barber"
+          element={
+            <BarberRoute>
+              <BarberDashboard />
+            </BarberRoute>
           }
         />
       </Routes>

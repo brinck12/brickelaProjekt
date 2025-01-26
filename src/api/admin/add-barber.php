@@ -56,13 +56,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Get form data
         $data = $_POST;
         
-        if (!isset($data['firstName'], $data['lastName'], $data['experience'], $data['specialization'], $data['startTime'], $data['endTime'])) {
+        if (!isset($data['email'], $data['experience'], $data['specialization'], $data['startTime'], $data['endTime'])) {
             throw new Exception('Missing required fields');
         }
 
-        // Insert barber data
+        // Fetch user details by email
+        $stmt = $conn->prepare("SELECT UgyfelID, Keresztnev, Vezeteknev FROM ugyfelek WHERE Email = ?");
+        $stmt->bind_param("s", $data['email']);
+        $stmt->execute();
+        $userResult = $stmt->get_result()->fetch_assoc();
+
+        if (!$userResult) {
+            throw new Exception('User not found with the provided email');
+        }
+
+        // Update user role to Barber
+        $stmt = $conn->prepare("UPDATE ugyfelek SET Osztaly = 'Barber' WHERE UgyfelID = ?");
+        $stmt->bind_param("i", $userResult['UgyfelID']);
+        $stmt->execute();
+
+        // Insert barber data using fetched user details
         $stmt = $conn->prepare("
             INSERT INTO fodraszok (
+                UgyfelID,
                 Keresztnev,
                 Vezeteknev,
                 evtapasztalat,
@@ -71,13 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 kep,
                 KezdesIdo,
                 BefejezesIdo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $stmt->bind_param(
-            "ssisssss",
-            $data['firstName'],
-            $data['lastName'],
+            "ississsss",
+            $userResult['UgyfelID'],  // Add UgyfelID
+            $userResult['Keresztnev'],  // Use fetched firstName
+            $userResult['Vezeteknev'],  // Use fetched lastName
             $data['experience'],
             $data['specialization'],
             $data['details'],

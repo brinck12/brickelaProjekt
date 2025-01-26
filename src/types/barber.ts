@@ -11,6 +11,7 @@ export interface Barber {
   Vezeteknev: string;
   KezdesIdo: string;
   BefejezesIdo: string;
+  email: string;
 }
 
 export interface BarberSchedule {

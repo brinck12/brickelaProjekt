@@ -14,41 +14,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
-        // Verify user authentication and admin role
         $decoded = verifyToken();
         
-        // Check if user is admin
-        $stmt = $conn->prepare("SELECT Osztaly FROM ugyfelek WHERE UgyfelID = ?");
+        // Check user role
+        $stmt = $conn->prepare("SELECT Osztaly, UgyfelID FROM ugyfelek WHERE UgyfelID = ?");
         $stmt->bind_param("i", $decoded->user_id);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
         
-        if (!$result || $result['Osztaly'] !== 'Adminisztrátor') {
+        if (!$result || !in_array($result['Osztaly'], ['Adminisztrátor', 'Barber'])) {
             throw new Exception('Unauthorized access');
         }
 
+        $isAdmin = $result['Osztaly'] === 'Adminisztrátor';
+        $userId = $result['UgyfelID'];
+
+        // Get barber ID if user is a barber
+        $barberId = null;
+        if (!$isAdmin) {
+            $stmt = $conn->prepare("SELECT FodraszID FROM fodraszok WHERE UgyfelID = ?");
+            if (!$stmt) {
+                throw new Exception('Failed to prepare barber query: ' . $conn->error);
+            }
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $barberResult = $stmt->get_result()->fetch_assoc();
+            
+            if (!$barberResult) {
+                throw new Exception('No barber profile found for this user. Please contact an administrator.');
+            }
+            
+            $barberId = $barberResult['FodraszID'];
+            if (!$barberId) {
+                throw new Exception('Invalid barber ID');
+            }
+        }
+
+        // Base query parts
+        $whereClause = $isAdmin ? "" : "WHERE f.FodraszID = ?";
+        
         // Get total appointments
-        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM foglalasok");
+        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM foglalasok f " . $whereClause);
+        if (!$isAdmin) $stmt->bind_param("i", $barberId);
         $stmt->execute();
         $totalAppointments = $stmt->get_result()->fetch_assoc()['total'];
 
         // Get today's appointments
-        $stmt = $conn->prepare("SELECT COUNT(*) as today FROM foglalasok WHERE DATE(FoglalasDatum) = CURDATE()");
+        $stmt = $conn->prepare("SELECT COUNT(*) as today FROM foglalasok f " . 
+            ($isAdmin ? "WHERE DATE(FoglalasDatum) = CURDATE()" : 
+            "WHERE DATE(FoglalasDatum) = CURDATE() AND f.FodraszID = ?"));
+        if (!$isAdmin) $stmt->bind_param("i", $barberId);
         $stmt->execute();
         $todayAppointments = $stmt->get_result()->fetch_assoc()['today'];
 
-        // Get total customers
-        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM ugyfelek WHERE Osztaly = 'Felhasználó'");
+        // Get total customers (unique customers for barber)
+        if ($isAdmin) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as total FROM ugyfelek WHERE Osztaly = 'Felhasználó'");
+        } else {
+            $stmt = $conn->prepare("SELECT COUNT(DISTINCT UgyfelID) as total FROM foglalasok WHERE FodraszID = ?");
+            $stmt->bind_param("i", $barberId);
+        }
         $stmt->execute();
         $totalCustomers = $stmt->get_result()->fetch_assoc()['total'];
 
-        // Get total barbers
-        $stmt = $conn->prepare("SELECT COUNT(*) as total FROM fodraszok");
-        $stmt->execute();
-        $totalBarbers = $stmt->get_result()->fetch_assoc()['total'];
-
-        // Get recent appointments with customer and barber names
-        $stmt = $conn->prepare("
+        // Get recent appointments
+        $query = "
             SELECT 
                 f.FoglalasID as id,
                 CONCAT(u.Vezeteknev, ' ', u.Keresztnev) as customerName,
@@ -63,22 +93,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             JOIN ugyfelek u ON f.UgyfelID = u.UgyfelID
             JOIN szolgaltatasok sz ON f.SzolgaltatasID = sz.SzolgaltatasID
             JOIN fodraszok fo ON f.FodraszID = fo.FodraszID
+            " . ($isAdmin ? "" : "WHERE f.FodraszID = ? ") . "
             ORDER BY f.FoglalasDatum DESC, f.FoglalasIdo DESC
             LIMIT 10
-        ");
+        ";
+        
+        $stmt = $conn->prepare($query);
+        if (!$isAdmin) $stmt->bind_param("i", $barberId);
         $stmt->execute();
         $recentAppointments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-        echo json_encode([
+        $response = [
             'success' => true,
             'stats' => [
                 'totalAppointments' => $totalAppointments,
                 'todayAppointments' => $todayAppointments,
-                'totalCustomers' => $totalCustomers,
-                'totalBarbers' => $totalBarbers
+                'totalCustomers' => $totalCustomers
             ],
             'recentAppointments' => $recentAppointments
-        ]);
+        ];
+
+        // Add total barbers count only for admin
+        if ($isAdmin) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as total FROM fodraszok");
+            $stmt->execute();
+            $response['stats']['totalBarbers'] = $stmt->get_result()->fetch_assoc()['total'];
+        }
+
+        echo json_encode($response);
 
     } catch (Exception $e) {
         http_response_code(401);
