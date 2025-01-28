@@ -1,19 +1,21 @@
 import { RefreshCw } from "lucide-react";
 
 interface DashboardHeaderProps {
+  title: string;
   autoRefresh: boolean;
   onAutoRefreshToggle: () => void;
   onManualRefresh: () => void;
 }
 
 export function DashboardHeader({
+  title,
   autoRefresh,
   onAutoRefreshToggle,
   onManualRefresh,
 }: DashboardHeaderProps) {
   return (
     <div className="flex justify-between items-center mb-8">
-      <h1 className="text-3xl font-bold text-barber-accent">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold text-barber-accent">{title}</h1>
       <div className="flex items-center gap-4">
         <button
           onClick={onAutoRefreshToggle}

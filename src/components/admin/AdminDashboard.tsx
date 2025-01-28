@@ -159,6 +159,7 @@ export default function AdminDashboard() {
         </button>
 
         <DashboardHeader
+          title="Admin Dashboard"
           autoRefresh={autoRefresh}
           onAutoRefreshToggle={() => setAutoRefresh(!autoRefresh)}
           onManualRefresh={fetchDashboardData}

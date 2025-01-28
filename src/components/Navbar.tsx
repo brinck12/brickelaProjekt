@@ -96,6 +96,22 @@ export default function Navbar() {
                       </button>
                     </>
                   )}
+                  {user?.Osztaly === "Barber" && (
+                    <>
+                      <div className="px-4 py-2 text-sm text-barber-accent border-b border-barber-secondary/20">
+                        Barber fiók
+                      </div>
+                      <button
+                        onClick={() => {
+                          navigate("/barber");
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-barber-primary text-barber-accent"
+                      >
+                        Barber Dashboard
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={() => {
                       navigate("/appointments");

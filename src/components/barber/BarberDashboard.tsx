@@ -153,6 +153,7 @@ export default function BarberDashboard() {
         </button>
 
         <DashboardHeader
+          title="Barber Dashboard"
           autoRefresh={autoRefresh}
           onAutoRefreshToggle={() => setAutoRefresh(!autoRefresh)}
           onManualRefresh={fetchDashboardData}

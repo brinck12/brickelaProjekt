@@ -29,6 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $isAdmin = $result['Osztaly'] === 'Adminisztrátor';
         $userId = $result['UgyfelID'];
 
+        // First, update appointments that are 30 minutes past their scheduled time to "Teljesítve"
+        $updateQuery = "
+            UPDATE foglalasok 
+            SET Allapot = 'Teljesítve'
+            WHERE Allapot = 'Foglalt' 
+            AND CONCAT(FoglalasDatum, ' ', FoglalasIdo) < DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+        ";
+        $conn->query($updateQuery);
+
         // Get barber ID if user is a barber
         $barberId = null;
         if (!$isAdmin) {

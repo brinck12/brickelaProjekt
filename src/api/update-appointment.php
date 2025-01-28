@@ -17,20 +17,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Verify user authentication and admin role
         $decoded = verifyToken();
         
-        // Check if user is admin
-        $stmt = $conn->prepare("SELECT Osztaly FROM ugyfelek WHERE UgyfelID = ?");
+        // Check if user is admin or barber
+        $stmt = $conn->prepare("SELECT Osztaly, UgyfelID FROM ugyfelek WHERE UgyfelID = ?");
         $stmt->bind_param("i", $decoded->user_id);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_assoc();
         
-        if (!$result || $result['Osztaly'] !== 'Adminisztrátor') {
+        if (!$result || !in_array($result['Osztaly'], ['Adminisztrátor', 'Barber'])) {
             throw new Exception('Unauthorized access');
+        }
+
+        $isAdmin = $result['Osztaly'] === 'Adminisztrátor';
+        $userId = $result['UgyfelID'];
+
+        // Get barber ID if user is a barber
+        $barberId = null;
+        if (!$isAdmin) {
+            $stmt = $conn->prepare("SELECT FodraszID FROM fodraszok WHERE UgyfelID = ?");
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $barberResult = $stmt->get_result()->fetch_assoc();
+            
+            if (!$barberResult) {
+                throw new Exception('No barber profile found for this user');
+            }
+            $barberId = $barberResult['FodraszID'];
         }
 
         $data = json_decode(file_get_contents('php://input'), true);
         
         if (!isset($data['appointmentId'], $data['date'], $data['time'], $data['status'])) {
             throw new Exception('Missing required fields');
+        }
+
+        // If barber, verify the appointment belongs to them
+        if (!$isAdmin) {
+            $stmt = $conn->prepare("SELECT FodraszID FROM foglalasok WHERE FoglalasID = ?");
+            $stmt->bind_param("i", $data['appointmentId']);
+            $stmt->execute();
+            $appointmentResult = $stmt->get_result()->fetch_assoc();
+            
+            if (!$appointmentResult || $appointmentResult['FodraszID'] !== $barberId) {
+                throw new Exception('You can only update your own appointments');
+            }
         }
 
         // Update the appointment
