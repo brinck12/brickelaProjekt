@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash, Upload, ArrowLeft } from "lucide-react";
-import { fetchBarbers, addBarber, updateBarber } from "../../api/apiService";
+import { fetchBarbers, updateBarber } from "../../api/apiService";
 import { Barber } from "../../types/barber";
 import { useNavigate } from "react-router-dom";
 
@@ -582,7 +582,6 @@ export function ManageBarbers() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      "Barber ID is required"{" "}
                       <label className="text-barber-light text-sm block mb-1">
                         Start Time
                       </label>

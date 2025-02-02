@@ -27,3 +27,16 @@ vissznyilak kipipalva nagyon kiralyul, majd meg kell nezni hogy mukszik a transi
 torlest akkor at kell gondolni, valami aktiv allapotra gondoltam eloszor az adatbazisban, de az is mukdone nekem hogy gombnyomasra kitorlom a gecibe mert fk.
 
 admin dashboard logikanak ugy kene kineznie akkor, hogy lehetne peldaul harom osztaly: felhasznalo, admin, barber. a barberek lathatnak az admin feluleleten a sajat cuccukat, az admin meg mindent? ebbe bele tartozna a ket manage gomb is, a barbereknek meg a sajat foglalasai, es egy szabadsag hozzaadas.
+
+
+## 2025-02-03
+
+annyi eszrevetelem volt hogy nem sticky a nav ezt majd holnap megdumaljuk mi legyen vele 
+
+a kalendarral kell majd valamit kezdeni hulye ez szar
+szerintem nem gond hogy mas a servicecard meg a barbercard design en elem oket de ha akarjuk at lehet cursorozni hogy passzoljanak
+
+azonkivul goated projekt neki lehetne allni az email kikuldeseknek
+win mink
+
+negyi-man x lil brick 2025 

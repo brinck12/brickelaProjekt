@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash, Upload, ArrowLeft } from "lucide-react";
-import { fetchServices, addService, deleteService } from "../../api/apiService";
+import { fetchServices } from "../../api/apiService";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
