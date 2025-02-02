@@ -21,8 +21,10 @@ const handleApiError = (error: unknown) => {
   throw error;
 };
 
+const API_BASE_URL = "http://localhost/project/src/api";
+
 const apiClient = axios.create({
-  baseURL: "http://localhost/project/src/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -257,20 +259,25 @@ export const updateService = async (
   }
 };
 
-export const deleteService = async (serviceId: number) => {
+export async function deleteService(serviceId: number) {
   try {
-    const response = await apiClient.post("/admin/delete-service.php", {
-      serviceId,
-    });
-    if (!response.data.success) {
-      throw new ApiError(response.data.message || "Failed to delete service");
+    const response = await axios.post(
+      `${API_BASE_URL}/admin/delete-service.php`,
+      {
+        serviceId: serviceId,
+      }
+    );
+
+    if (response.data.success) {
+      return response.data;
+    } else {
+      throw new Error(response.data.error || "Failed to delete service");
     }
-    return response.data;
   } catch (error) {
-    handleApiError(error);
-    throw error;
+    console.error("Delete service error:", error);
+    throw new ApiError("Failed to delete service");
   }
-};
+}
 
 export const checkAppointments = (barberId: string | number, date: string) => {
   return apiClient.post("/check-appointments.php", { barberId, date });

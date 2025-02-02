@@ -8,35 +8,28 @@ interface ServiceCardProps {
 
 export default function ServiceCard({ service, onSelect }: ServiceCardProps) {
   return (
-    <div className="bg-barber-primary border border-barber-secondary/20 rounded-none hover:border-barber-accent transition-all duration-300">
-      <img
-        src={service.image}
-        alt={service.name}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-6">
-        <h3 className="text-xl font-serif mb-2 text-barber-accent">
-          {service.name}
-        </h3>
-        <p className="text-barber-light/80 mb-4">{service.description}</p>
-        <div className="flex justify-between items-center mb-6 text-barber-secondary">
-          <div className="flex items-center gap-1">
-            <Clock size={16} />
-            <span>{service.duration}</span>
-          </div>
-          <span className="text-barber-accent font-semibold">
-            ${service.price}
-          </span>
-        </div>
-
-        <button
-          onClick={onSelect}
-          className="w-full bg-barber-primary border-2 border-barber-accent text-barber-accent 
-                   hover:bg-barber-accent hover:text-barber-primary py-2 transition-colors duration-300"
-        >
-          Book Now
-        </button>
+    <div
+      onClick={onSelect}
+      className="bg-barber-dark rounded-lg p-6 cursor-pointer hover:bg-barber-dark/80 transition-colors group"
+    >
+      <div className="mb-4 overflow-hidden rounded-lg">
+        <img
+          src={`http://localhost/project/src/imgs/${service.image}`}
+          alt={service.name}
+          className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300"
+        />
       </div>
+
+      <h3 className="text-xl font-semibold text-barber-accent mb-2">
+        {service.name}
+      </h3>
+      <div className="flex justify-between items-center text-barber-light mb-2">
+        <span>{service.duration} perc</span>
+        <span>{service.price} Ft</span>
+      </div>
+      {service.description && (
+        <p className="text-barber-secondary text-sm">{service.description}</p>
+      )}
     </div>
   );
 }

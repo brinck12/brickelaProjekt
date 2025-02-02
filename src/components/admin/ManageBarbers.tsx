@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash, Upload, ArrowLeft } from "lucide-react";
-import {
-  fetchBarbers,
-  addBarber,
-  deleteBarber,
-  updateBarber,
-} from "../../api/apiService";
+import { fetchBarbers, addBarber, updateBarber } from "../../api/apiService";
 import { Barber } from "../../types/barber";
 import { useNavigate } from "react-router-dom";
 
@@ -26,6 +21,14 @@ export function ManageBarbers() {
     endTime: "",
   });
   const navigate = useNavigate();
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    barberId: number | null;
+  }>({ isOpen: false, barberId: null });
+  const [errorModal, setErrorModal] = useState<{
+    isOpen: boolean;
+    message: string;
+  }>({ isOpen: false, message: "" });
 
   useEffect(() => {
     loadBarbers();
@@ -35,8 +38,10 @@ export function ManageBarbers() {
     try {
       setIsLoading(true);
       const response = await fetchBarbers();
-      setBarbers(response.data);
-      console.log(response.data);
+      const activeBarbers = response.data.filter(
+        (barber: Barber) => barber.Aktiv === 1
+      );
+      setBarbers(activeBarbers);
     } catch (error) {
       setError("Failed to load barbers");
       console.error(error);
@@ -69,6 +74,7 @@ export function ManageBarbers() {
 
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append("id", selectedBarber.id.toString());
       if (selectedImage) {
         formDataToSend.append("image", selectedImage);
       }
@@ -78,6 +84,7 @@ export function ManageBarbers() {
       formDataToSend.append("details", formData.details);
       formDataToSend.append("startTime", formData.startTime);
       formDataToSend.append("endTime", formData.endTime);
+      formDataToSend.append("token", localStorage.getItem("userToken") || "");
 
       await updateBarber(selectedBarber.id, formDataToSend);
       await loadBarbers();
@@ -91,7 +98,7 @@ export function ManageBarbers() {
 
   const handleAddBarber = async () => {
     if (!selectedImage) {
-      alert("Please select an image");
+      setErrorModal({ isOpen: true, message: "Kérjük válasszon ki egy képet" });
       return;
     }
 
@@ -105,8 +112,29 @@ export function ManageBarbers() {
       formDataToSend.append("startTime", formData.startTime);
       formDataToSend.append("endTime", formData.endTime);
 
-      await addBarber(formDataToSend);
+      const response = await fetch(
+        "http://localhost/project/src/api/admin/add-barber.php",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
+      const data = await response.json();
+
+      if (data.error) {
+        setErrorModal({
+          isOpen: true,
+          message: `${data.error}`,
+        });
+        return;
+      }
+
+      // Várjunk egy kicsit, hogy a fájl biztosan felkerüljön a szerverre
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Frissítsük a listát
       await loadBarbers();
+
       setIsAddModalOpen(false);
       setFormData({
         email: "",
@@ -119,17 +147,66 @@ export function ManageBarbers() {
       setSelectedImage(null);
     } catch (error) {
       console.error("Failed to add barber:", error);
+      setErrorModal({
+        isOpen: true,
+        message: `Hiba történt a borbély hozzáadása közben: ${
+          error instanceof Error ? error.message : "Ismeretlen hiba"
+        }`,
+      });
     }
   };
 
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+    setFormData({
+      email: "",
+      experience: "",
+      specialization: "",
+      details: "",
+      startTime: "",
+      endTime: "",
+    });
+    setSelectedImage(null);
+  };
+
   const handleDeleteBarber = async (barberId: number) => {
-    if (window.confirm("Are you sure you want to delete this barber?")) {
-      try {
-        await deleteBarber(barberId);
-        await loadBarbers();
-      } catch (error) {
-        console.error("Failed to delete barber:", error);
+    setDeleteConfirmation({ isOpen: true, barberId });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmation.barberId) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("id", deleteConfirmation.barberId.toString());
+
+      const response = await fetch(
+        "http://localhost/project/src/api/admin/delete-barber.php",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+          body: formData,
+        }
+      );
+      const data = await response.json();
+
+      if (data.error) {
+        setErrorModal({ isOpen: true, message: `${data.error}` });
+        return;
       }
+
+      await loadBarbers();
+      setDeleteConfirmation({ isOpen: false, barberId: null });
+    } catch (error) {
+      console.error("Failed to delete barber:", error);
+      setErrorModal({
+        isOpen: true,
+        message: `Hiba történt a borbély törlése közben: ${
+          error instanceof Error ? error.message : "Ismeretlen hiba"
+        }`,
+      });
     }
   };
 
@@ -172,7 +249,18 @@ export function ManageBarbers() {
               Manage Barbers
             </h2>
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => {
+                setFormData({
+                  email: "",
+                  experience: "",
+                  specialization: "",
+                  details: "",
+                  startTime: "",
+                  endTime: "",
+                });
+                setSelectedImage(null);
+                setIsAddModalOpen(true);
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded bg-barber-accent text-white hover:bg-barber-accent/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -292,7 +380,7 @@ export function ManageBarbers() {
                       onChange={(e) =>
                         setFormData({ ...formData, experience: e.target.value })
                       }
-                      className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                      className="w-full px-3 py-2 rounded bg-barber-primary text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                   <div>
@@ -329,15 +417,23 @@ export function ManageBarbers() {
                         Start Time
                       </label>
                       <input
-                        type="time"
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        min="0"
+                        max="24"
                         value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (parseInt(value) <= 24 || value === "") {
+                            setFormData({
+                              ...formData,
+                              startTime: value,
+                            });
+                          }
+                        }}
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                        placeholder="8"
                       />
                     </div>
                     <div>
@@ -345,18 +441,29 @@ export function ManageBarbers() {
                         End Time
                       </label>
                       <input
-                        type="time"
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        min="0"
+                        max="24"
                         value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endTime: e.target.value })
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (parseInt(value) <= 24 || value === "") {
+                            setFormData({
+                              ...formData,
+                              endTime: value,
+                            });
+                          }
+                        }}
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                        placeholder="16"
                       />
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 mt-6">
                     <button
-                      onClick={() => setIsAddModalOpen(false)}
+                      onClick={handleCloseAddModal}
                       className="px-4 py-2 rounded bg-barber-primary text-white"
                     >
                       Cancel
@@ -441,7 +548,7 @@ export function ManageBarbers() {
                             experience: e.target.value,
                           })
                         }
-                        className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                        className="w-full px-3 py-2 rounded bg-barber-primary text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>
@@ -475,19 +582,28 @@ export function ManageBarbers() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
+                      "Barber ID is required"{" "}
                       <label className="text-barber-light text-sm block mb-1">
                         Start Time
                       </label>
                       <input
-                        type="time"
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        min="0"
+                        max="24"
                         value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (parseInt(value) <= 24 || value === "") {
+                            setFormData({
+                              ...formData,
+                              startTime: value,
+                            });
+                          }
+                        }}
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                        placeholder="8"
                       />
                     </div>
                     <div>
@@ -495,12 +611,23 @@ export function ManageBarbers() {
                         End Time
                       </label>
                       <input
-                        type="time"
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        min="0"
+                        max="24"
                         value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endTime: e.target.value })
-                        }
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (parseInt(value) <= 24 || value === "") {
+                            setFormData({
+                              ...formData,
+                              endTime: value,
+                            });
+                          }
+                        }}
                         className="w-full px-3 py-2 rounded bg-barber-primary text-white"
+                        placeholder="16"
                       />
                     </div>
                   </div>
@@ -522,6 +649,59 @@ export function ManageBarbers() {
                       Update Barber
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delete Confirmation Modal */}
+          {deleteConfirmation.isOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
+                <h3 className="text-xl font-semibold text-barber-accent mb-4">
+                  Borbély törlése
+                </h3>
+                <p className="text-barber-light mb-6">
+                  Biztosan törölni szeretné ezt a borbélyt? Ez a művelet nem
+                  vonható vissza.
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() =>
+                      setDeleteConfirmation({ isOpen: false, barberId: null })
+                    }
+                    className="px-4 py-2 rounded bg-barber-primary text-white hover:bg-barber-primary/90 transition-colors"
+                  >
+                    Mégse
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  >
+                    Törlés
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error Modal */}
+          {errorModal.isOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
+                <h3 className="text-xl font-semibold text-red-500 mb-4">
+                  Hiba történt
+                </h3>
+                <p className="text-barber-light mb-6">{errorModal.message}</p>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() =>
+                      setErrorModal({ isOpen: false, message: "" })
+                    }
+                    className="px-4 py-2 rounded bg-barber-primary text-white hover:bg-barber-primary/90 transition-colors"
+                  >
+                    Bezárás
+                  </button>
                 </div>
               </div>
             </div>

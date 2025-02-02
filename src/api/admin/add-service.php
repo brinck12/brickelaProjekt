@@ -1,72 +1,76 @@
 <?php
-header('Access-Control-Allow-Origin: http://localhost:5173');
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json');
+require_once '../config.php';
+require_once '../cors_headers.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit;
 }
 
-require_once '../config.php';
-require_once '../middleware/auth.php';
+try {
+    // Kép kezelése
+    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Kérjük töltsön fel egy képet');
+    }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $uploadDir = '../../imgs/';
+    $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    $newFileName = uniqid('service_') . '.' . $fileExtension;
+    $uploadFile = $uploadDir . $newFileName;
+
+    if (!move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
+        throw new Exception('Nem sikerült feltölteni a képet');
+    }
+
     try {
-        // Verify user authentication and admin role
-        $decoded = verifyToken();
-        
-        // Check if user is admin
-        $stmt = $conn->prepare("SELECT Osztaly FROM ugyfelek WHERE UgyfelID = ?");
-        $stmt->bind_param("i", $decoded->user_id);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        
-        if (!$result || $result['Osztaly'] !== 'Adminisztrátor') {
-            throw new Exception('Unauthorized access');
+        // Adatok validálása
+        $name = isset($_POST['name']) ? $_POST['name'] : null;
+        $price = isset($_POST['price']) ? intval($_POST['price']) : null;
+        $duration = isset($_POST['duration']) ? intval($_POST['duration']) : null;
+        $description = isset($_POST['description']) ? $_POST['description'] : null;
+
+        if (!$name || !$price || !$duration) {
+            throw new Exception('Minden mező kitöltése kötelező');
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Ellenőrizzük, hogy létezik-e már ilyen nevű szolgáltatás
+        $checkStmt = $conn->prepare("SELECT SzolgaltatasID FROM szolgaltatasok WHERE SzolgaltatasNev = ?");
+        $checkStmt->bind_param("s", $name);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
         
-        if (!isset($data['name'], $data['price'], $data['duration'])) {
-            throw new Exception('Missing required fields');
+        if ($result->num_rows > 0) {
+            throw new Exception('Már létezik ilyen nevű szolgáltatás');
         }
 
-        // Insert service data
-        $stmt = $conn->prepare("
-            INSERT INTO szolgaltatasok (
-                SzolgaltatasNev,
-                Ar,
-                Idotartam,
-                Leiras
-            ) VALUES (?, ?, ?, ?)
-        ");
-
-        $stmt->bind_param(
-            "siis",
-            $data['name'],
-            $data['price'],
-            $data['duration'],
-            $data['description']
-        );
-
+        // Szolgáltatás hozzáadása
+        $stmt = $conn->prepare("INSERT INTO szolgaltatasok (SzolgaltatasNev, Ar, IdotartamPerc, Leiras, KepURL) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("siiss", $name, $price, $duration, $description, $newFileName);
+        
         if ($stmt->execute()) {
             echo json_encode([
                 'success' => true,
-                'message' => 'Service added successfully',
-                'serviceId' => $stmt->insert_id
+                'message' => 'Szolgáltatás sikeresen hozzáadva'
             ]);
         } else {
-            throw new Exception('Failed to add service');
+            throw new Exception('Nem sikerült hozzáadni a szolgáltatást');
         }
 
     } catch (Exception $e) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => $e->getMessage()
-        ]);
+        // Hiba esetén töröljük a feltöltött képet
+        if (file_exists($uploadFile)) {
+            unlink($uploadFile);
+        }
+        throw $e;
     }
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'error' => $e->getMessage()
+    ]);
 }
+
+$conn->close();
 ?> 

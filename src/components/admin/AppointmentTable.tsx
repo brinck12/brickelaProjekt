@@ -105,9 +105,9 @@ export function AppointmentTable({
                 <td className="py-3">
                   <span
                     className={`px-2 py-1 rounded-full text-sm ${
-                      appointment.status === "teljesítve"
+                      appointment.status === "Teljesítve"
                         ? "bg-green-500/20 text-green-500"
-                        : appointment.status === "foglalt"
+                        : appointment.status === "Foglalt"
                         ? "bg-yellow-500/20 text-yellow-500"
                         : "bg-red-500/20 text-red-500"
                     }`}

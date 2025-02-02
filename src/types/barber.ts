@@ -1,17 +1,16 @@
 export interface Barber {
   id: number;
   nev: string;
+  email: string;
   kep: string;
   evtapasztalat: string;
   specializacio: string;
-  reszletek: string;
-  startTime: string;
-  endTime: string;
-  Keresztnev: string;
-  Vezeteknev: string;
+  reszletek?: string;
   KezdesIdo: string;
   BefejezesIdo: string;
-  email: string;
+  Aktiv: number; // 0 vagy 1
+  Keresztnev: string;
+  Vezeteknev: string;
 }
 
 export interface BarberSchedule {
