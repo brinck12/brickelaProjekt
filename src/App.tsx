@@ -21,9 +21,12 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import { ManageBarbers } from "./components/admin/ManageBarbers";
 import { ManageServices } from "./components/admin/ManageServices";
 import BarberDashboard from "./components/barber/BarberDashboard";
+import { EmailVerification } from "./components/EmailVerification";
+import { CancelBooking } from "./components/CancelBooking";
 
 function AnimatedRoutes() {
   const location = useLocation();
+  console.log("Current location:", location); // Debug log
 
   return (
     <AnimatePresence mode="wait">
@@ -31,6 +34,8 @@ function AnimatedRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/activate" element={<EmailVerification />} />
+        <Route path="/cancel-booking" element={<CancelBooking />} />
         <Route
           path="/services"
           element={

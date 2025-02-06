@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Konfiguráció és hitelesítés szükséges fájlok beleértése
 require_once 'config.php';         // Adatbázis kapcsolat és konfiguráció
 require_once 'middleware/auth.php'; // Hitelesítés middleware
+require_once 'services/EmailService.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -51,32 +52,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception('Ezt az időpontot már foglalták');
         }
         
-        // Ha minden ellenőrzés sikeres, beillesztjük a foglalást az adatbázisba
-        // foglalasok table oszlopai: UgyfelID (CustomerID), FodraszID (BarberID),
-        // SzolgaltatasID (ServiceID), FoglalasDatum (BookingDate), FoglalasIdo (BookingTime),
-        // Megjegyzes (Notes), LetrehozasIdopontja (CreationTimestamp)
-        $stmt = $conn->prepare("INSERT INTO foglalasok 
-            (UgyfelID, FodraszID, SzolgaltatasID, FoglalasDatum, FoglalasIdo, Megjegyzes, LetrehozasIdopontja) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW())");
+        // Start transaction
+        $conn->begin_transaction();
+        
+        try {
+            // Insert booking
+            $stmt = $conn->prepare("INSERT INTO foglalasok 
+                (UgyfelID, FodraszID, SzolgaltatasID, FoglalasDatum, FoglalasIdo, Megjegyzes, LetrehozasIdopontja, Allapot) 
+                VALUES (?, ?, ?, ?, ?, ?, NOW(), 'Foglalt')");
             
-        // Választható megjegyzések lekérdezése a kérésből vagy üres karakterlánc, ha nincs megadva
-        $megjegyzes = $data['megjegyzes'] ?? '';
-        
-        // Bind parameters to the prepared statement
-        $stmt->bind_param("iiisss", 
-            $decoded->user_id,      // A dekódolt JWT tokenből lekérjük a felhasználó ID-jét
-            $data['barberId'],      // Fodrasz ID a kérésből
-            $data['serviceId'],     // Szolgáltatás ID a kérésből
-            $bookingDate,           // Ellenőrzött foglalás dátuma
-            $bookingTime,           // Ellenőrzött foglalás időpontja
-            $megjegyzes            // Megjegyzések (opcionális)
-        );
-        
-        // Végrehajtjuk az inserthez és visszaadjuk a megfelelő választ
-        if ($stmt->execute()) {
+            // Választható megjegyzések lekérdezése a kérésből vagy üres karakterlánc, ha nincs megadva
+            $megjegyzes = $data['megjegyzes'] ?? '';
+            
+            // Bind parameters to the prepared statement
+            $stmt->bind_param("iiisss", 
+                $decoded->user_id,      // A dekódolt JWT tokenből lekérjük a felhasználó ID-jét
+                $data['barberId'],      // Fodrasz ID a kérésből
+                $data['serviceId'],     // Szolgáltatás ID a kérésből
+                $bookingDate,           // Ellenőrzött foglalás dátuma
+                $bookingTime,           // Ellenőrzött foglalás időpontja
+                $megjegyzes            // Megjegyzések (opcionális)
+            );
+            
+            // Végrehajtjuk az inserthez és visszaadjuk a megfelelő választ
+            if (!$stmt->execute()) {
+                throw new Exception('Foglalás létrehozása sikertelen');
+            }
+
+            // Get booking details for email
+            $bookingQuery = $conn->prepare("
+                SELECT 
+                    f.FoglalasID,
+                    f.FoglalasDatum as datum,
+                    f.FoglalasIdo as idopont,
+                    f.LetrehozasIdopontja,
+                    sz.IdotartamPerc as idotartam,
+                    sz.Ar as ar,
+                    sz.SzolgaltatasNev as szolgaltatas_nev,
+                    CONCAT(fo.Keresztnev, ' ', fo.Vezeteknev) as borbely_nev,
+                    u.Email as email
+                FROM foglalasok f
+                JOIN szolgaltatasok sz ON f.SzolgaltatasID = sz.SzolgaltatasID
+                JOIN fodraszok fo ON f.FodraszID = fo.FodraszID
+                JOIN ugyfelek u ON f.UgyfelID = u.UgyfelID
+                WHERE f.FoglalasID = LAST_INSERT_ID()
+            ");
+            
+            $bookingQuery->execute();
+            $bookingDetails = $bookingQuery->get_result()->fetch_assoc();
+
+            // Send confirmation email
+            $emailService = new EmailService();
+            $emailService->sendBookingConfirmation($bookingDetails['email'], $bookingDetails);
+
+            // Commit transaction
+            $conn->commit();
+            
             echo json_encode(['success' => true, 'message' => 'Foglalás sikeresen létrehozva']);
-        } else {
-            throw new Exception('Foglalás létrehozása sikertelen');
+            
+        } catch (Exception $e) {
+            $conn->rollback();
+            throw $e;
         }
         
     } catch (Exception $e) {

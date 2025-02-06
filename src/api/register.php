@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once 'config.php';
+require_once 'services/EmailService.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -52,6 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = password_hash($data['password'], PASSWORD_BCRYPT);
         $osztaly = 'Felhasználó';
         $regisztracioIdopontja = date('Y-m-d H:i:s');
+        $verificationToken = bin2hex(random_bytes(32));
+        $aktiv = 0; // Account starts as inactive
 
         // Check if email already exists
         $stmt = $conn->prepare("SELECT 1 FROM ugyfelek WHERE Email = ?");
@@ -71,28 +74,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $stmt->close();
 
-        // Insert new user
-        $stmt = $conn->prepare("INSERT INTO ugyfelek 
-            (Keresztnev, Vezeteknev, Telefonszam, Email, Jelszo, Osztaly, RegisztracioIdopontja) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)");
-        
-        $stmt->bind_param("sssssss", 
-            $keresztnev,
-            $vezeteknev,
-            $telefonszam,
-            $email,
-            $password,
-            $osztaly,
-            $regisztracioIdopontja
-        );
+        // Start transaction
+        $conn->begin_transaction();
 
-        if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Registration successful']);
-        } else {
-            throw new Exception('Registration failed: ' . $stmt->error);
+        try {
+            // Insert new user
+            $stmt = $conn->prepare("INSERT INTO ugyfelek 
+                (Keresztnev, Vezeteknev, Telefonszam, Email, Jelszo, Osztaly, RegisztracioIdopontja, VerificationToken, Aktiv) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            
+            $stmt->bind_param("ssssssssi", 
+                $keresztnev,
+                $vezeteknev,
+                $telefonszam,
+                $email,
+                $password,
+                $osztaly,
+                $regisztracioIdopontja,
+                $verificationToken,
+                $aktiv
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception('Registration failed: ' . $stmt->error);
+            }
+
+            // Send verification email
+            $emailService = new EmailService();
+            $emailService->sendRegistrationEmail($email, $keresztnev, $verificationToken);
+
+            // Commit transaction
+            $conn->commit();
+
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Registration successful. Please check your email to verify your account.'
+            ]);
+
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $conn->rollback();
+            throw $e;
+        } finally {
+            $stmt->close();
         }
 
-        $stmt->close();
     } catch (Exception $e) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

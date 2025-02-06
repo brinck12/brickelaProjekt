@@ -25,4 +25,13 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+
+// SMTP configuration
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_USERNAME', 'sziateszeplany@gmail.com');
+define('SMTP_PASSWORD', 'fbnijximdfiywsnz');
+define('SMTP_PORT', 587);
+
+// Set timezone
+date_default_timezone_set('Europe/Budapest');
 ?> 

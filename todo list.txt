@@ -40,3 +40,9 @@ azonkivul goated projekt neki lehetne allni az email kikuldeseknek
 win mink
 
 negyi-man x lil brick 2025 
+
+## 2025-02-06
+
+email:
+- regisztrációs email✅
+- foglalás email amiben van egy lemondás gomb
