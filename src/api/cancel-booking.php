@@ -13,20 +13,37 @@ require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
-        error_log("Cancel booking request received with token: " . ($_GET['token'] ?? 'no token'));
+        // Rate limiting
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $rateLimitKey = "cancel_attempt_{$ip}";
+        
+        // Check if there are too many attempts
+        $stmt = $conn->prepare("SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND action = 'cancel' AND timestamp > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        $stmt->bind_param("s", $ip);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $attempts = $result->fetch_assoc()['attempts'];
+        
+        if ($attempts > 10) {
+            throw new Exception('Túl sok próbálkozás. Kérjük próbálja újra később.');
+        }
+        
+        // Log attempt
+        $stmt = $conn->prepare("INSERT INTO rate_limits (ip_address, action) VALUES (?, 'cancel')");
+        $stmt->bind_param("s", $ip);
+        $stmt->execute();
 
         if (!isset($_GET['token'])) {
             throw new Exception('Hiányzó lemondási token');
         }
 
         $token = $_GET['token'];
-        error_log("Looking up booking with token: " . $token);
         
-        // Verify and get booking details
+        // Verify and get booking details using the secure token
         $stmt = $conn->prepare("
-            SELECT f.FoglalasID, f.Allapot, f.FoglalasDatum, f.FoglalasIdo, f.LetrehozasIdopontja
+            SELECT f.FoglalasID, f.Allapot, f.FoglalasDatum, f.FoglalasIdo, f.CancellationToken
             FROM foglalasok f
-            WHERE MD5(CONCAT(f.FoglalasID, f.LetrehozasIdopontja)) = ?
+            WHERE f.CancellationToken = ?
             AND f.Allapot = 'Foglalt'
         ");
         
@@ -34,29 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $stmt->execute();
         $result = $stmt->get_result();
         
-        error_log("Found " . $result->num_rows . " matching bookings");
-        
         if ($result->num_rows === 0) {
-            // Log the actual values we're trying to match
-            $debugQuery = $conn->prepare("
-                SELECT f.FoglalasID, f.Allapot, f.FoglalasDatum, f.FoglalasIdo, f.LetrehozasIdopontja,
-                       MD5(CONCAT(f.FoglalasID, f.LetrehozasIdopontja)) as generated_token
-                FROM foglalasok f
-                WHERE f.Allapot = 'Foglalt'
-            ");
-            $debugQuery->execute();
-            $debugResult = $debugQuery->get_result();
-            while ($row = $debugResult->fetch_assoc()) {
-                error_log("Debug - Booking ID: " . $row['FoglalasID'] . 
-                         ", Status: " . $row['Allapot'] . 
-                         ", Generated Token: " . $row['generated_token']);
-            }
             throw new Exception('Érvénytelen vagy lejárt lemondási link');
         }
         
         $booking = $result->fetch_assoc();
         
-        // Check if the appointment is in the future and within 24 hours
+        // Check if the appointment is in the future and more than 24 hours away
         $appointmentDateTime = strtotime($booking['FoglalasDatum'] . ' ' . $booking['FoglalasIdo']);
         $now = time();
         
@@ -68,24 +69,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             throw new Exception('Időpontot csak 24 órával előtte lehet lemondani');
         }
         
-        // Update booking status to cancelled
-        $updateStmt = $conn->prepare("
-            UPDATE foglalasok 
-            SET Allapot = 'Lemondva',
-                LemondasIdopontja = NOW()
-            WHERE FoglalasID = ?
-        ");
+        // Start transaction
+        $conn->begin_transaction();
         
-        $updateStmt->bind_param("i", $booking['FoglalasID']);
-        
-        if (!$updateStmt->execute()) {
-            throw new Exception('Nem sikerült lemondani az időpontot');
+        try {
+            // Update booking status to cancelled and clear the cancellation token
+            $updateStmt = $conn->prepare("
+                UPDATE foglalasok 
+                SET Allapot = 'Lemondva',
+                    LemondasIdopontja = NOW(),
+                    CancellationToken = NULL
+                WHERE FoglalasID = ?
+            ");
+            
+            $updateStmt->bind_param("i", $booking['FoglalasID']);
+            
+            if (!$updateStmt->execute()) {
+                throw new Exception('Nem sikerült lemondani az időpontot');
+            }
+            
+            // Commit transaction
+            $conn->commit();
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Az időpont sikeresen lemondva'
+            ]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            throw $e;
         }
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Az időpont sikeresen lemondva'
-        ]);
         
     } catch (Exception $e) {
         http_response_code(400);

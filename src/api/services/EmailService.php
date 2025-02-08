@@ -102,6 +102,21 @@ class EmailService {
         }
     }
 
+    public function sendThankYouEmail($email, $emailContent) {
+        try {
+            $this->mailer->clearAddresses();
+            $this->mailer->addAddress($email);
+            $this->mailer->Subject = 'Köszönjük a látogatást! - BrickEla Cuts';
+            
+            $this->mailer->Body = $emailContent;
+            $this->mailer->AltBody = strip_tags($emailContent);
+            
+            return $this->mailer->send();
+        } catch (Exception $e) {
+            throw new Exception('Failed to send thank you email: ' . $e->getMessage());
+        }
+    }
+
     private function getRegistrationEmailTemplate($keresztnev, $activationLink) {
         return '
         <!DOCTYPE html>
@@ -162,47 +177,47 @@ class EmailService {
             <title>Foglalás visszaigazolása</title>
         </head>
         <body style="margin: 0; padding: 0; background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <h1 style="color: #c0a080; margin: 0;">BrickEla Cuts</h1>
+            <div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h1 style="color: #c0a080; margin: 0; font-size: 24px;">BrickEla Cuts</h1>
                 </div>
                 
                 <div style="padding: 20px; background-color: #1a1a1a; color: #ffffff;">
-                    <h2 style="color: #c0a080;">Foglalás visszaigazolása</h2>
+                    <h2 style="color: #c0a080; font-size: 20px;">Foglalás visszaigazolása</h2>
                     
-                    <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 4px; margin: 20px 0;">
-                        <p><strong style="color: #c0a080;">Időpont:</strong> ' . $date . ' ' . $time . '</p>
-                        <p><strong style="color: #c0a080;">Szolgáltatás:</strong> ' . htmlspecialchars($booking['szolgaltatas_nev']) . '</p>
-                        <p><strong style="color: #c0a080;">Borbély:</strong> ' . htmlspecialchars($booking['borbely_nev']) . '</p>
-                        <p><strong style="color: #c0a080;">Időtartam:</strong> ' . $booking['idotartam'] . ' perc</p>
-                        <p><strong style="color: #c0a080;">Ár:</strong> ' . number_format($booking['ar'], 0, ',', ' ') . ' Ft</p>
+                    <div style="background-color: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px; color: #ffffff;">
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Időpont:</strong> <span style="color: #ffffff;">' . $date . ' ' . $time . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Szolgáltatás:</strong> <span style="color: #ffffff;">' . htmlspecialchars($booking['szolgaltatas_nev']) . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Borbély:</strong> <span style="color: #ffffff;">' . htmlspecialchars($booking['borbely_nev']) . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Időtartam:</strong> <span style="color: #ffffff;">' . $booking['idotartam'] . ' perc</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Ár:</strong> <span style="color: #ffffff;">' . number_format($booking['ar'], 0, ',', ' ') . ' Ft</span></p>
                     </div>
                     
-                    <p>Az időpontot sikeresen lefoglaltuk számodra. Kérjük, érkezz 5-10 perccel korábban.</p>
+                    <p style="font-size: 14px; color: #ffffff;">Az időpontot sikeresen lefoglaltuk számodra. Kérjük, érkezz 5-10 perccel korábban.</p>
                     
-                    <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 4px; margin: 20px 0;">
-                        <h3 style="color: #c0a080; margin-top: 0;">Helyszín</h3>
-                        <p>1234 Budapest, Példa utca 123.</p>
-                        <p>Tel: +36 30 123 4567</p>
+                    <div style="background-color: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px;">
+                        <h3 style="color: #c0a080; margin-top: 0; font-size: 16px;">Helyszín</h3>
+                        <p style="margin: 8px 0; color: #ffffff;">1234 Budapest, Példa utca 123.</p>
+                        <p style="margin: 8px 0; color: #ffffff;">Tel: +36 30 123 4567</p>
                     </div>
                     
-                    <p>Ha mégsem tudsz eljönni, az alábbi gombra kattintva lemondhatod az időpontot:</p>
+                    <p style="font-size: 14px; color: #ffffff;">Ha mégsem tudsz eljönni, az alábbi gombra kattintva lemondhatod az időpontot:</p>
                     
-                    <div style="text-align: center; margin: 30px 0;">
+                    <div style="text-align: center; margin: 20px 0;">
                         <a href="' . $cancellationLink . '" 
-                           style="display: inline-block; padding: 12px 24px; background-color: #dc3545; color: white; 
-                                  text-decoration: none; border-radius: 4px; font-weight: bold;">
+                           style="display: inline-block; padding: 10px 20px; background-color: #dc3545; color: #ffffff; 
+                                  text-decoration: none; border-radius: 4px; font-size: 14px;">
                             Időpont lemondása
                         </a>
                     </div>
                     
-                    <p style="color: #dc3545; font-size: 14px;">
+                    <p style="color: #ffffff; font-size: 12px;">
                         * Az időpontot csak 24 órával az időpont előtt lehet lemondani.
                     </p>
                 </div>
                 
-                <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.7); font-size: 12px;">
-                    <p>© 2024 BrickEla Cuts - Minden jog fenntartva</p>
+                <div style="text-align: center; padding: 15px; color: #ffffff; font-size: 11px;">
+                    <p style="margin: 5px 0;">© 2024 BrickEla Cuts - Minden jog fenntartva</p>
                 </div>
             </div>
         </body>
@@ -210,33 +225,50 @@ class EmailService {
     }
 
     private function getAppointmentReminderTemplate($customerName, $date, $time, $duration, $barberName, $serviceName, $price) {
-        return "
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
-            <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
-                <h1 style='color: #333; text-align: center; margin-bottom: 20px;'>Időpont Emlékeztető</h1>
-                
-                <p style='font-size: 16px; color: #666;'>Kedves {$customerName}!</p>
-                
-                <p style='font-size: 16px; color: #666;'>Ez egy emlékeztető a holnapi időpontjáról a BrickEla Cuts-nál.</p>
-                
-                <div style='background-color: white; padding: 20px; border-radius: 5px; margin: 20px 0;'>
-                    <h2 style='color: #333; font-size: 18px; margin-bottom: 15px;'>Foglalás Részletei:</h2>
-                    <ul style='list-style: none; padding: 0;'>
-                        <li style='margin-bottom: 10px;'><strong>Dátum:</strong> {$date}</li>
-                        <li style='margin-bottom: 10px;'><strong>Időpont:</strong> {$time}</li>
-                        <li style='margin-bottom: 10px;'><strong>Időtartam:</strong> {$duration}</li>
-                        <li style='margin-bottom: 10px;'><strong>Fodrász:</strong> {$barberName}</li>
-                        <li style='margin-bottom: 10px;'><strong>Szolgáltatás:</strong> {$serviceName}</li>
-                        <li style='margin-bottom: 10px;'><strong>Ár:</strong> {$price}</li>
-                    </ul>
+        return '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Időpont Emlékeztető</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif;">
+            <div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h1 style="color: #c0a080; margin: 0; font-size: 24px;">BrickEla Cuts</h1>
                 </div>
                 
-                <p style='font-size: 14px; color: #666; margin-top: 20px;'>Ha nem tud megjelenni az időponton, kérjük, értesítsen minket időben.</p>
+                <div style="padding: 20px; background-color: #1a1a1a; color: #ffffff;">
+                    <h2 style="color: #c0a080; font-size: 20px; margin-bottom: 15px;">Időpont Emlékeztető</h2>
+                    
+                    <p style="font-size: 14px; line-height: 1.5; color: #ffffff;">Kedves ' . htmlspecialchars($customerName) . '!</p>
+                    
+                    <p style="font-size: 14px; line-height: 1.5; color: #ffffff;">Ez egy emlékeztető a holnapi időpontjáról a BrickEla Cuts-nál.</p>
+                    
+                    <div style="background-color: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px;">
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Dátum:</strong> <span style="color: #ffffff;">' . $date . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Időpont:</strong> <span style="color: #ffffff;">' . $time . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Időtartam:</strong> <span style="color: #ffffff;">' . $duration . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Fodrász:</strong> <span style="color: #ffffff;">' . htmlspecialchars($barberName) . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Szolgáltatás:</strong> <span style="color: #ffffff;">' . htmlspecialchars($serviceName) . '</span></p>
+                        <p style="margin: 8px 0;"><strong style="color: #c0a080;">Ár:</strong> <span style="color: #ffffff;">' . $price . '</span></p>
+                    </div>
+                    
+                    <div style="background-color: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px;">
+                        <h3 style="color: #c0a080; margin-top: 0; font-size: 16px;">Helyszín</h3>
+                        <p style="margin: 8px 0; color: #ffffff;">1234 Budapest, Példa utca 123.</p>
+                        <p style="margin: 8px 0; color: #ffffff;">Tel: +36 30 123 4567</p>
+                    </div>
+                    
+                    <p style="font-size: 14px; color: #ffffff;">Kérjük, érkezzen 5-10 perccel korábban. Ha nem tud megjelenni az időponton, kérjük, értesítsen minket időben.</p>
+                </div>
                 
-                <div style='text-align: center; margin-top: 30px;'>
-                    <p style='font-size: 14px; color: #666;'>Üdvözlettel,<br>BrickEla Cuts Csapata</p>
+                <div style="text-align: center; padding: 15px; color: rgba(255,255,255,0.5); font-size: 11px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px;">
+                    <p style="margin: 5px 0;">© 2024 BrickEla Cuts - Minden jog fenntartva</p>
+                    <p style="margin: 5px 0;">Cím: 1234 Budapest, Példa utca 123.</p>
                 </div>
             </div>
-        </div>";
+        </body>
+        </html>';
     }
 } 

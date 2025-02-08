@@ -4,7 +4,10 @@ import { Appointment } from "../types/appointment";
 //import { Reference } from "../types/reference";
 
 export class ApiError extends Error {
-  constructor(message: string, public statusCode?: number) {
+  constructor(
+    message: string,
+    public statusCode?: number
+  ) {
     super(message);
     this.name = "ApiError";
   }
@@ -12,11 +15,16 @@ export class ApiError extends Error {
 
 const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ message?: string }>;
-    throw new ApiError(
-      axiosError.response?.data?.message || "An unexpected error occurred",
-      axiosError.response?.status
-    );
+    const axiosError = error as AxiosError<{
+      error?: string;
+      message?: string;
+    }>;
+    // First try to get the error message from the response data
+    const errorMessage =
+      axiosError.response?.data?.error ||
+      axiosError.response?.data?.message ||
+      "Váratlan hiba történt";
+    throw new ApiError(errorMessage, axiosError.response?.status);
   }
   throw error;
 };
@@ -74,19 +82,19 @@ export const login = async (
   try {
     const response = await apiClient.post<{
       success: boolean;
-      token: string;
-      user: LoginResponse["user"];
-      message?: string;
+      token?: string;
+      user?: LoginResponse["user"];
+      error?: string;
     }>("/login.php", { email, password });
 
-    if (response.data.success) {
+    if (response.data.success && response.data.token && response.data.user) {
       setUserToken(response.data.token);
       return {
         token: response.data.token,
         user: response.data.user,
       };
     }
-    throw new ApiError(response.data.message || "Login failed");
+    throw new ApiError(response.data.error || "Bejelentkezés sikertelen");
   } catch (error) {
     handleApiError(error);
     throw error;

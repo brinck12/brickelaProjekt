@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import FormInput from "./FormInput";
 import { useAuth } from "../hooks/useAuth";
-// AuthContext használata
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -15,11 +14,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
     try {
-      await login(formData.email, formData.password); // AuthContext login funkciójának meghívása
-      navigate(from, { replace: true }); // Átirányítás sikeres bejelentkezés után
+      await login(formData.email, formData.password);
+      navigate(from, { replace: true });
     } catch (err) {
-      setError("Bejelentkezés nem sikerült: " + (err as Error).message); // Hiba kezelése
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Váratlan hiba történt");
+      }
+      console.error("Login error:", err);
     }
   };
 

@@ -79,6 +79,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Foglalás létrehozása sikertelen');
             }
 
+            $bookingId = $conn->insert_id;
+
+            // Generate secure cancellation token
+            $randomBytes = random_bytes(32);
+            $cancellationToken = hash('sha256', $randomBytes . $bookingId . $decoded->user_id);
+            
+            // Store the cancellation token
+            $tokenStmt = $conn->prepare("
+                UPDATE foglalasok 
+                SET CancellationToken = ?
+                WHERE FoglalasID = ?
+            ");
+            $tokenStmt->bind_param("si", $cancellationToken, $bookingId);
+            $tokenStmt->execute();
+
             // Get booking details for email
             $bookingQuery = $conn->prepare("
                 SELECT 
@@ -86,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     f.FoglalasDatum as datum,
                     f.FoglalasIdo as idopont,
                     f.LetrehozasIdopontja,
+                    f.CancellationToken,
                     sz.IdotartamPerc as idotartam,
                     sz.Ar as ar,
                     sz.SzolgaltatasNev as szolgaltatas_nev,

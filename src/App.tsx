@@ -23,10 +23,10 @@ import { ManageServices } from "./components/admin/ManageServices";
 import BarberDashboard from "./components/barber/BarberDashboard";
 import { EmailVerification } from "./components/EmailVerification";
 import { CancelBooking } from "./components/CancelBooking";
+import { ReviewPage } from "./components/ReviewPage";
 
 function AnimatedRoutes() {
   const location = useLocation();
-  console.log("Current location:", location); // Debug log
 
   return (
     <AnimatePresence mode="wait">
@@ -36,6 +36,7 @@ function AnimatedRoutes() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/activate" element={<EmailVerification />} />
         <Route path="/cancel-booking" element={<CancelBooking />} />
+        <Route path="/review" element={<ReviewPage />} />
         <Route
           path="/services"
           element={
