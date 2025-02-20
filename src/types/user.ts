@@ -1,6 +1,6 @@
 export interface User {
   id: number;
-  email: string;
+  Email: string;
   Keresztnev: string;
   Vezeteknev: string;
   Telefonszam: string;

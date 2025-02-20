@@ -39,22 +39,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         $token = $_GET['token'];
         
-        // Verify and get booking details using the secure token
+        // First check if the token exists at all
+        $checkStmt = $conn->prepare("
+            SELECT FoglalasID, Allapot
+            FROM foglalasok
+            WHERE CancellationToken = ?
+        ");
+        
+        $checkStmt->bind_param("s", $token);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            throw new Exception('Érvénytelen lemondási token');
+        }
+        
+        $booking = $checkResult->fetch_assoc();
+        
+        // Check booking status
+        if ($booking['Allapot'] !== 'Foglalt') {
+            throw new Exception('Ez az időpont már le van mondva vagy nem érvényes');
+        }
+        
+        // Now get the full booking details
         $stmt = $conn->prepare("
             SELECT f.FoglalasID, f.Allapot, f.FoglalasDatum, f.FoglalasIdo, f.CancellationToken
             FROM foglalasok f
-            WHERE f.CancellationToken = ?
-            AND f.Allapot = 'Foglalt'
+            WHERE f.FoglalasID = ?
         ");
         
-        $stmt->bind_param("s", $token);
+        $stmt->bind_param("i", $booking['FoglalasID']);
         $stmt->execute();
         $result = $stmt->get_result();
-        
-        if ($result->num_rows === 0) {
-            throw new Exception('Érvénytelen vagy lejárt lemondási link');
-        }
-        
         $booking = $result->fetch_assoc();
         
         // Check if the appointment is in the future and more than 24 hours away

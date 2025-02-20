@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { Calendar } from "./ui/calendar";
-import "react-day-picker/dist/style.css";
+import { CustomCalendar } from "./ui/custom-calendar";
 import FormInput from "./FormInput";
 import { Barber } from "../types/barber";
 import { Service } from "../types/service";
@@ -61,7 +60,7 @@ export default function BookingForm() {
     console.log("User data:", userData);
     return {
       name: userData?.Keresztnev || "",
-      email: userData?.Email || "",
+      email: userData?.email || "",
       phone: userData?.Telefonszam || "",
       date: "",
       time: "",
@@ -323,12 +322,10 @@ export default function BookingForm() {
                     <label className="block text-barber-light">
                       Válassz dátumot
                     </label>
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
+                    <CustomCalendar
+                      selectedDate={selectedDate}
                       onSelect={handleDateSelect}
                       disabled={(date: Date) => date < new Date()}
-                      className="rounded-md border border-barber-secondary/20 bg-barber-primary p-3"
                     />
                   </div>
 

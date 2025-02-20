@@ -165,9 +165,8 @@ class EmailService {
         $date = date('Y. m. d.', strtotime($booking['datum']));
         $time = date('H:i', strtotime($booking['idopont']));
         
-        // Generate cancellation token
-        $cancellationToken = md5($booking['FoglalasID'] . $booking['LetrehozasIdopontja']);
-        $cancellationLink = "http://localhost:5173/cancel-booking?token=" . $cancellationToken;
+        // Use the actual cancellation token from the database
+        $cancellationLink = "http://localhost:5173/cancel-booking?token=" . $booking['CancellationToken'];
         
         return '
         <!DOCTYPE html>
