@@ -1,0 +1,231 @@
+{
+  "info": {
+    "name": "Barbershop API Tests",
+    "description": "API tests for the Barbershop application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Services",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost/project/src/api/services.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["project", "src", "api", "services.php"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has services array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "    pm.expect(jsonData.data.length).to.be.greaterThan(0);",
+              "});",
+              "",
+              "pm.test(\"Services have required properties\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var firstService = jsonData.data[0];",
+              "    pm.expect(firstService).to.have.property('id');",
+              "    pm.expect(firstService).to.have.property('name');",
+              "    pm.expect(firstService).to.have.property('price');",
+              "    pm.expect(firstService).to.have.property('duration');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Barbers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost/project/src/api/barbers.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["project", "src", "api", "barbers.php"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has barbers array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+              "});",
+              "",
+              "pm.test(\"Barbers have required properties\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var firstBarber = jsonData[0];",
+              "    pm.expect(firstBarber).to.have.property('id');",
+              "    pm.expect(firstBarber).to.have.property('nev');",
+              "    pm.expect(firstBarber).to.have.property('kep');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Check Appointments",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost/project/src/api/check-appointments.php?barberId=1&date=2023-12-01",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["project", "src", "api", "check-appointments.php"],
+          "query": [
+            {
+              "key": "barberId",
+              "value": "1"
+            },
+            {
+              "key": "date",
+              "value": "2023-12-01"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has success property\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('success');",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test(\"Response has bookedTimes array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('bookedTimes');",
+              "    pm.expect(jsonData.data.bookedTimes).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"barberId\": \"1\",\n    \"serviceId\": \"1\",\n    \"date\": \"2023-12-01\",\n    \"time\": \"10:00\",\n    \"megjegyzes\": \"Test booking from Postman\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost/project/src/api/create-booking.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["project", "src", "api", "create-booking.php"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has success property\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('success');",
+              "});",
+              "",
+              "// This test might fail if the time slot is already booked",
+              "pm.test(\"Booking was successful\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Submit Review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"token\": \"test-token-123\",\n    \"rating\": 5,\n    \"comment\": \"Excellent service, very professional!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost/project/src/api/submit-review.php",
+          "protocol": "http",
+          "host": ["localhost"],
+          "path": ["project", "src", "api", "submit-review.php"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has success property\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('success');",
+              "});",
+              "",
+              "// This test might fail if the token is invalid",
+              "pm.test(\"Review submission response\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
