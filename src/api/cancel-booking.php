@@ -94,7 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 UPDATE foglalasok 
                 SET Allapot = 'Lemondva',
                     LemondasIdopontja = NOW(),
-                    CancellationToken = NULL
+                    CancellationToken = NULL,
+                    FoglalasIdo = NULL,  /* Clear the booking time */
+                    FoglalasDatum = NULL  /* Clear the booking date */
                 WHERE FoglalasID = ?
             ");
             

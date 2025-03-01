@@ -4,10 +4,7 @@ import { Appointment } from "../types/appointment";
 //import { Reference } from "../types/reference";
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number
-  ) {
+  constructor(message: string, public statusCode?: number) {
     super(message);
     this.name = "ApiError";
   }
@@ -340,6 +337,70 @@ export const fetchDashboardStats = async () => {
         response.data.message || "Failed to fetch dashboard stats"
       );
     }
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const submitReview = async (
+  token: string,
+  rating: number,
+  comment?: string
+): Promise<ApiResponse<void>> => {
+  try {
+    const response = await apiClient.post<ApiResponse<void>>(
+      "/submit-review.php",
+      {
+        token,
+        rating,
+        comment: comment?.trim() || null,
+      }
+    );
+
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to submit review");
+    }
+
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const verifyEmail = async (
+  token: string
+): Promise<ApiResponse<void>> => {
+  try {
+    const response = await apiClient.get<ApiResponse<void>>(
+      `/verify-email.php?token=${token}`
+    );
+
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to verify email");
+    }
+
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+export const cancelBooking = async (
+  token: string
+): Promise<ApiResponse<void>> => {
+  try {
+    const response = await apiClient.get<ApiResponse<void>>(
+      `/cancel-booking.php?token=${token}`
+    );
+
+    if (!response.data.success) {
+      throw new ApiError(response.data.message || "Failed to cancel booking");
+    }
+
     return response.data;
   } catch (error) {
     handleApiError(error);

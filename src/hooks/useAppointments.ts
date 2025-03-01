@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Appointment, fetchAppointments } from "../api/apiService";
+import { fetchAppointments } from "../api/apiService";
+import { Appointment } from "../types/appointment";
 import { useAuth } from "./useAuth";
 
 export function useAppointments() {

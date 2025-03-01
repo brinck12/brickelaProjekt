@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { CustomCalendar } from "./ui/custom-calendar";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar } from "./ui/calendar";
 import FormInput from "./FormInput";
 import { Barber } from "../types/barber";
 import { Service } from "../types/service";
@@ -51,6 +52,7 @@ export default function BookingForm() {
   const [selectedTime, setSelectedTime] = useState("");
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+  const appointmentsRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState(() => {
     // Get user data from localStorage
@@ -163,6 +165,14 @@ export default function BookingForm() {
         date: format(date, "yyyy-MM-dd"),
         time: "",
       });
+
+      // Wait for the appointments section to render
+      setTimeout(() => {
+        appointmentsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
     }
   };
 
@@ -322,43 +332,71 @@ export default function BookingForm() {
                     <label className="block text-barber-light">
                       Válassz dátumot
                     </label>
-                    <CustomCalendar
-                      selectedDate={selectedDate}
-                      onSelect={handleDateSelect}
-                      disabled={(date: Date) => date < new Date()}
+                    <Calendar
+                      selected={selectedDate}
+                      onDateSelect={handleDateSelect}
                     />
                   </div>
 
-                  {selectedDate && (
-                    <div className="space-y-2">
-                      <label className="block text-barber-light">
-                        Válassz időpontot
-                      </label>
-                      <div className="max-h-[200px] overflow-y-auto rounded-lg border border-barber-secondary/20">
-                        <div className="grid grid-cols-4 gap-2 p-3">
-                          {availableTimeSlots.map((time) => (
-                            <button
-                              key={time}
-                              type="button"
-                              onClick={() => handleTimeSelection(time)}
-                              className={`p-2 rounded text-sm ${
-                                selectedTime === time
-                                  ? "bg-barber-accent text-barber-primary"
-                                  : "bg-barber-primary text-barber-light hover:bg-barber-secondary/20"
-                              }`}
+                  <AnimatePresence mode="wait">
+                    {selectedDate && (
+                      <motion.div
+                        ref={appointmentsRef}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-2 overflow-hidden"
+                      >
+                        <label className="block text-barber-light">
+                          Válassz időpontot
+                        </label>
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 20, opacity: 0 }}
+                          className="max-h-[200px] overflow-y-auto rounded-lg border border-barber-secondary/20"
+                        >
+                          <div className="grid grid-cols-4 gap-2 p-3">
+                            <AnimatePresence mode="popLayout">
+                              {availableTimeSlots.map((time) => (
+                                <motion.button
+                                  key={time}
+                                  layout
+                                  initial={{ scale: 0.8, opacity: 0 }}
+                                  animate={{ scale: 1, opacity: 1 }}
+                                  exit={{ scale: 0.8, opacity: 0 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  type="button"
+                                  onClick={() => handleTimeSelection(time)}
+                                  className={`p-2 rounded text-sm ${
+                                    selectedTime === time
+                                      ? "bg-barber-accent text-barber-primary"
+                                      : "bg-barber-primary text-barber-light hover:bg-barber-secondary/20"
+                                  }`}
+                                >
+                                  {time}
+                                </motion.button>
+                              ))}
+                            </AnimatePresence>
+                          </div>
+                        </motion.div>
+                        <AnimatePresence>
+                          {availableTimeSlots.length === 0 && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="text-barber-accent text-sm mt-2"
                             >
-                              {time}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      {availableTimeSlots.length === 0 && (
-                        <p className="text-barber-accent text-sm mt-2">
-                          Nincs elérhető időpont ezen a napon
-                        </p>
-                      )}
-                    </div>
-                  )}
+                              Nincs elérhető időpont ezen a napon
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <button
                     type="submit"

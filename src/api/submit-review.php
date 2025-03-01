@@ -30,10 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->begin_transaction();
         
         try {
-            // Get booking ID from review token
+            // Get booking ID and related info from review token
             $stmt = $conn->prepare("
-                SELECT rt.FoglalasID, rt.Used, rt.ExpiresAt
+                SELECT rt.FoglalasID, rt.Used, rt.ExpiresAt, f.FodraszID, f.UgyfelID
                 FROM review_tokens rt
+                JOIN foglalasok f ON rt.FoglalasID = f.FoglalasID
                 WHERE rt.Token = ?
                 AND rt.Used = 0
                 AND rt.ExpiresAt > NOW()
@@ -59,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updateToken->bind_param("s", $data['token']);
             $updateToken->execute();
             
-            // Store the review
+            // Store the review in foglalasok table
             $updateBooking = $conn->prepare("
                 UPDATE foglalasok 
                 SET 
@@ -78,6 +79,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!$updateBooking->execute()) {
                 throw new Exception('Nem sikerült menteni az értékelést');
+            }
+
+            // Insert into ertekelesek table with correct field names
+            $insertReview = $conn->prepare("
+                INSERT INTO ertekelesek 
+                (FoglalasID, Ertekeles, Velemeny, LetrehozasIdopontja)
+                VALUES (?, ?, ?, NOW())
+            ");
+
+            $insertReview->bind_param("iis",
+                $tokenData['FoglalasID'],
+                $rating,
+                $comment
+            );
+
+            if (!$insertReview->execute()) {
+                throw new Exception('Nem sikerült menteni az értékelést az értékelések táblába');
             }
             
             // Commit transaction

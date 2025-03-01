@@ -23,7 +23,7 @@ import { ManageServices } from "./components/admin/ManageServices";
 import BarberDashboard from "./components/barber/BarberDashboard";
 import { EmailVerification } from "./components/EmailVerification";
 import { CancelBooking } from "./components/CancelBooking";
-import { ReviewPage } from "./components/ReviewPage";
+import ReviewPage from "./components/ReviewPage";
 
 function AnimatedRoutes() {
   const location = useLocation();

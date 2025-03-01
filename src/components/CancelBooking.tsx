@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { cancelBooking, ApiError } from "../api/apiService";
 
 export function CancelBooking() {
   console.log("CancelBooking component mounted");
@@ -14,7 +14,7 @@ export function CancelBooking() {
   const cancellationAttempted = useRef(false);
 
   useEffect(() => {
-    const cancelBooking = async () => {
+    const performCancellation = async () => {
       if (cancellationAttempted.current) {
         return;
       }
@@ -32,32 +32,26 @@ export function CancelBooking() {
 
       try {
         console.log("Making API request...");
-        const response = await axios.get(
-          `http://localhost/project/src/api/cancel-booking.php?token=${token}`
-        );
-        console.log("API Response:", response.data);
+        const response = await cancelBooking(token);
+        console.log("API Response:", response);
 
-        if (response.data.success) {
-          setStatus("success");
-          setMessage(response.data.message);
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-        } else {
-          setStatus("error");
-          setMessage(response.data.message);
-        }
+        setStatus("success");
+        setMessage(response.message || "Időpont sikeresen lemondva");
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
       } catch (error) {
         console.error("Cancellation error:", error);
         setStatus("error");
-        setMessage(
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Hiba történt az időpont lemondása közben"
-        );
+        if (error instanceof ApiError) {
+          setMessage(error.message);
+        } else {
+          setMessage("Hiba történt az időpont lemondása közben");
+        }
       }
     };
 
-    cancelBooking();
+    performCancellation();
   }, [searchParams, navigate]);
 
   return (

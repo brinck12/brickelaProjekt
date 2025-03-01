@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { verifyEmail, ApiError } from "../api/apiService";
 
 export function EmailVerification() {
   const [searchParams] = useSearchParams();
@@ -12,7 +12,7 @@ export function EmailVerification() {
   const verificationAttempted = useRef(false);
 
   useEffect(() => {
-    const verifyEmail = async () => {
+    const performEmailVerification = async () => {
       // Prevent double verification attempts
       if (verificationAttempted.current) {
         return;
@@ -30,33 +30,27 @@ export function EmailVerification() {
 
       try {
         console.log("Making verification request..."); // Debug log
-        const response = await axios.get(
-          `http://localhost/project/src/api/verify-email.php?token=${token}`
-        );
-        console.log("Verification response:", response.data); // Debug log
+        const response = await verifyEmail(token);
+        console.log("Verification response:", response); // Debug log
 
-        if (response.data.success) {
-          setStatus("success");
-          setMessage(response.data.message);
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
-            navigate("/login");
-          }, 3000);
-        } else {
-          setStatus("error");
-          setMessage(response.data.message);
-        }
+        setStatus("success");
+        setMessage(response.message || "Email cím sikeresen megerősítve");
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
       } catch (error) {
         console.error("Verification error:", error); // Debug log
         setStatus("error");
-        setMessage(
-          (error as { response?: { data?: { message?: string } } })?.response
-            ?.data?.message || "Hiba történt az email cím megerősítése közben"
-        );
+        if (error instanceof ApiError) {
+          setMessage(error.message);
+        } else {
+          setMessage("Hiba történt az email cím megerősítése közben");
+        }
       }
     };
 
-    verifyEmail();
+    performEmailVerification();
   }, [searchParams, navigate]);
 
   return (

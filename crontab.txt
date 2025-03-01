@@ -1,5 +1,0 @@
-# Run the thank you email script every 5 minutes
-*/5 * * * * php C:\XAMPP\htdocs\project\src\api\cron\send-thank-you-emails.php >> C:\XAMPP\htdocs\project\logs\thank-you-emails.log 2>&1
-
-
-# Note: Replace /path/to/your/project with the actual path to your project directory 
