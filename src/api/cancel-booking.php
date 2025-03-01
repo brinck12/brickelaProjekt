@@ -13,26 +13,6 @@ require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
-        // Rate limiting
-        $ip = $_SERVER['REMOTE_ADDR'];
-        $rateLimitKey = "cancel_attempt_{$ip}";
-        
-        // Check if there are too many attempts
-        $stmt = $conn->prepare("SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND action = 'cancel' AND timestamp > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
-        $stmt->bind_param("s", $ip);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $attempts = $result->fetch_assoc()['attempts'];
-        
-        if ($attempts > 10) {
-            throw new Exception('Túl sok próbálkozás. Kérjük próbálja újra később.');
-        }
-        
-        // Log attempt
-        $stmt = $conn->prepare("INSERT INTO rate_limits (ip_address, action) VALUES (?, 'cancel')");
-        $stmt->bind_param("s", $ip);
-        $stmt->execute();
-
         if (!isset($_GET['token'])) {
             throw new Exception('Hiányzó lemondási token');
         }
