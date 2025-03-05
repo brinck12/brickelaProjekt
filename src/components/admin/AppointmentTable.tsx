@@ -48,14 +48,14 @@ export function AppointmentTable({
     <div className="bg-barber-dark rounded-lg p-6 shadow-lg">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-barber-accent">
-          Recent Appointments
+          Legutóbbi foglalások
         </h2>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="w-5 h-5 text-barber-light absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search appointments..."
+              placeholder="Foglalás keresése..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 pr-4 py-2 rounded bg-barber-primary text-barber-light placeholder-barber-light/50 focus:outline-none focus:ring-2 focus:ring-barber-accent"
@@ -76,7 +76,7 @@ export function AppointmentTable({
             className="flex items-center gap-2 px-4 py-2 rounded bg-barber-accent text-white hover:bg-barber-accent/90 transition-colors"
           >
             <Download className="w-4 h-4" />
-            Export
+            Exportálás
           </button>
         </div>
       </div>
@@ -136,7 +136,7 @@ export function AppointmentTable({
             {appointments.length === 0 && (
               <tr>
                 <td colSpan={6} className="py-4 text-center text-barber-light">
-                  No appointments found
+                  Nem található foglalás
                 </td>
               </tr>
             )}

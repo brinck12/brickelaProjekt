@@ -15,7 +15,7 @@ export function ViewAppointmentModal({
       <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold text-barber-accent">
-            Appointment Details
+            Foglalás részletei
           </h3>
           <button
             onClick={onClose}
@@ -26,32 +26,32 @@ export function ViewAppointmentModal({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-barber-light text-sm">Customer</label>
+            <label className="text-barber-light text-sm">Ügyfél</label>
             <p className="text-white font-medium">{appointment.customerName}</p>
           </div>
           <div>
-            <label className="text-barber-light text-sm">Service</label>
+            <label className="text-barber-light text-sm">Szolgáltatás</label>
             <p className="text-white font-medium">{appointment.service}</p>
           </div>
           <div>
-            <label className="text-barber-light text-sm">Barber</label>
+            <label className="text-barber-light text-sm">Borbély</label>
             <p className="text-white font-medium">
-              {appointment.barberName || "Not assigned"}
+              {appointment.barberName || "Nincs hozzárendelve"}
             </p>
           </div>
           <div>
-            <label className="text-barber-light text-sm">Date & Time</label>
+            <label className="text-barber-light text-sm">Dátum és idő</label>
             <p className="text-white font-medium">
               {appointment.date} at {appointment.time}
             </p>
           </div>
           <div>
-            <label className="text-barber-light text-sm">Status</label>
+            <label className="text-barber-light text-sm">Állapot</label>
             <p className="text-white font-medium">{appointment.status}</p>
           </div>
           {appointment.note && (
             <div>
-              <label className="text-barber-light text-sm">Note</label>
+              <label className="text-barber-light text-sm">Megjegyzés</label>
               <p className="text-white font-medium">{appointment.note}</p>
             </div>
           )}

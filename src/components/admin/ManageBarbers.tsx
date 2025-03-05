@@ -149,7 +149,7 @@ export function ManageBarbers() {
       console.error("Failed to add barber:", error);
       setErrorModal({
         isOpen: true,
-        message: `Hiba történt a borbély hozzáadása közben: ${
+        message: `Hiba történt a barber hozzáadása közben: ${
           error instanceof Error ? error.message : "Ismeretlen hiba"
         }`,
       });
@@ -240,13 +240,13 @@ export function ManageBarbers() {
           className="flex items-center gap-2 text-barber-accent hover:text-barber-accent/80 transition-colors mb-6"
         >
           <ArrowLeft className="w-5 h-5" />
-          Back to Dashboard
+          Vissza az irányítópultra
         </button>
 
         <div className="bg-barber-dark rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-barber-accent">
-              Manage Barbers
+              Barberek kezelése
             </h2>
             <button
               onClick={() => {
@@ -264,7 +264,7 @@ export function ManageBarbers() {
               className="flex items-center gap-2 px-4 py-2 rounded bg-barber-accent text-white hover:bg-barber-accent/90 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Add Barber
+              Barber hozzáadása
             </button>
           </div>
 
@@ -272,12 +272,12 @@ export function ManageBarbers() {
             <table className="w-full">
               <thead>
                 <tr className="text-left text-barber-light border-b border-barber-secondary/20">
-                  <th className="pb-4">Image</th>
-                  <th className="pb-4">Name</th>
-                  <th className="pb-4">Experience</th>
-                  <th className="pb-4">Specialization</th>
-                  <th className="pb-4">Working Hours</th>
-                  <th className="pb-4">Actions</th>
+                  <th className="pb-4">Kép</th>
+                  <th className="pb-4">Név</th>
+                  <th className="pb-4">Tapasztalat</th>
+                  <th className="pb-4">Specializáció</th>
+                  <th className="pb-4">Munkaidő</th>
+                  <th className="pb-4">Műveletek</th>
                 </tr>
               </thead>
               <tbody className="bg-barber-dark">
@@ -326,12 +326,12 @@ export function ManageBarbers() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
                 <h3 className="text-xl font-semibold text-barber-accent mb-4">
-                  Add New Barber
+                  Új barber hozzáadása
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Profile Image
+                      Kép
                     </label>
                     <div className="flex items-center gap-4">
                       {selectedImage && (
@@ -343,7 +343,7 @@ export function ManageBarbers() {
                       )}
                       <label className="flex items-center gap-2 px-4 py-2 rounded bg-barber-primary text-white cursor-pointer hover:bg-barber-primary/90">
                         <Upload className="w-4 h-4" />
-                        Choose Image
+                        Kép kiválasztása
                         <input
                           type="file"
                           accept="image/*"
@@ -355,7 +355,7 @@ export function ManageBarbers() {
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Email Address
+                      Email cím
                     </label>
                     <input
                       type="email"
@@ -367,12 +367,12 @@ export function ManageBarbers() {
                         })
                       }
                       className="w-full px-3 py-2 rounded bg-barber-primary text-white"
-                      placeholder="Enter registered user's email"
+                      placeholder="Regisztrált felhasználó email címe"
                     />
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Experience (years)
+                      Tapasztalat (év)
                     </label>
                     <input
                       type="number"
@@ -385,7 +385,7 @@ export function ManageBarbers() {
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Specialization
+                      Specializáció
                     </label>
                     <input
                       type="text"
@@ -401,7 +401,7 @@ export function ManageBarbers() {
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Details
+                      Részletek
                     </label>
                     <textarea
                       value={formData.details}
@@ -414,7 +414,7 @@ export function ManageBarbers() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        Start Time
+                        Kezdes Idő
                       </label>
                       <input
                         type="text"
@@ -438,7 +438,7 @@ export function ManageBarbers() {
                     </div>
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        End Time
+                        Befejezes Idő
                       </label>
                       <input
                         type="text"
@@ -466,13 +466,13 @@ export function ManageBarbers() {
                       onClick={handleCloseAddModal}
                       className="px-4 py-2 rounded bg-barber-primary text-white"
                     >
-                      Cancel
+                      Mégse
                     </button>
                     <button
                       onClick={handleAddBarber}
                       className="px-4 py-2 rounded bg-barber-accent text-white"
                     >
-                      Add Barber
+                      Barber hozzáadása
                     </button>
                   </div>
                 </div>
@@ -485,12 +485,12 @@ export function ManageBarbers() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
                 <h3 className="text-xl font-semibold text-barber-accent mb-4">
-                  Edit Barber
+                  Barber szerkesztése
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Profile Image
+                      Kép
                     </label>
                     <div className="flex items-center gap-4">
                       {selectedImage ? (
@@ -508,7 +508,7 @@ export function ManageBarbers() {
                       )}
                       <label className="flex items-center gap-2 px-4 py-2 rounded bg-barber-primary text-white cursor-pointer hover:bg-barber-primary/90">
                         <Upload className="w-4 h-4" />
-                        Choose New Image
+                        Új kép kiválasztása
                         <input
                           type="file"
                           accept="image/*"
@@ -537,7 +537,7 @@ export function ManageBarbers() {
                     </div>
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        Experience (years)
+                        Tapasztalat (év)
                       </label>
                       <input
                         type="number"
@@ -554,7 +554,7 @@ export function ManageBarbers() {
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Specialization
+                      Specializáció
                     </label>
                     <input
                       type="text"
@@ -570,7 +570,7 @@ export function ManageBarbers() {
                   </div>
                   <div>
                     <label className="text-barber-light text-sm block mb-1">
-                      Details
+                      Részletek
                     </label>
                     <textarea
                       value={formData.details}
@@ -583,7 +583,7 @@ export function ManageBarbers() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        Start Time
+                        Kezdes Idő
                       </label>
                       <input
                         type="text"
@@ -607,7 +607,7 @@ export function ManageBarbers() {
                     </div>
                     <div>
                       <label className="text-barber-light text-sm block mb-1">
-                        End Time
+                        Befejezes Idő
                       </label>
                       <input
                         type="text"
@@ -639,13 +639,13 @@ export function ManageBarbers() {
                       }}
                       className="px-4 py-2 rounded bg-barber-primary text-white"
                     >
-                      Cancel
+                      Mégse
                     </button>
                     <button
                       onClick={handleUpdateBarber}
                       className="px-4 py-2 rounded bg-barber-accent text-white"
                     >
-                      Update Barber
+                      Barber szerkesztése
                     </button>
                   </div>
                 </div>
@@ -658,10 +658,10 @@ export function ManageBarbers() {
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-barber-dark p-6 rounded-lg w-full max-w-md">
                 <h3 className="text-xl font-semibold text-barber-accent mb-4">
-                  Borbély törlése
+                  Barber törlése
                 </h3>
                 <p className="text-barber-light mb-6">
-                  Biztosan törölni szeretné ezt a borbélyt? Ez a művelet nem
+                  Biztosan törölni szeretné ezt a barbert? Ez a művelet nem
                   vonható vissza.
                 </p>
                 <div className="flex justify-end gap-3">

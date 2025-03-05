@@ -40,11 +40,11 @@ export default function ServiceSelection() {
             className="flex items-center gap-2 text-barber-accent hover:text-barber-secondary transition-colors mb-6 md:mb-8"
           >
             <ArrowLeft size={20} />
-            Back to Home
+            Vissza a főoldalra
           </button>
 
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-6 md:mb-8 text-barber-accent">
-            Choose Your Service
+            Válasszon szolgáltatást
           </h1>
 
           {loading && <p className="text-barber-secondary">Loading...</p>}

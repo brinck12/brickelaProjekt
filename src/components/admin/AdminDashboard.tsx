@@ -159,7 +159,7 @@ export default function AdminDashboard() {
         </button>
 
         <DashboardHeader
-          title="Admin Dashboard"
+          title="Irányítópult"
           autoRefresh={autoRefresh}
           onAutoRefreshToggle={() => setAutoRefresh(!autoRefresh)}
           onManualRefresh={fetchDashboardData}
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
             className="flex items-center justify-center gap-3 p-4 bg-barber-dark rounded-lg text-barber-accent hover:bg-barber-dark/80 transition-colors"
           >
             <UserPlus className="w-6 h-6" />
-            Fodrászok kezelése
+            Barberek kezelése
           </button>
           <button
             onClick={() => navigate("/admin/services")}

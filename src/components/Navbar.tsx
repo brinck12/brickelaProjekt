@@ -92,7 +92,7 @@ export default function Navbar() {
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-barber-primary text-barber-accent"
                       >
-                        Admin Dashboard
+                        Admin Irányítópult
                       </button>
                     </>
                   )}
@@ -108,7 +108,7 @@ export default function Navbar() {
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-barber-primary text-barber-accent"
                       >
-                        Barber Dashboard
+                        Barber Irányítópult
                       </button>
                     </>
                   )}

@@ -24,7 +24,9 @@ export function DashboardHeader({
           } text-white transition-colors`}
         >
           <RefreshCw className="w-4 h-4" />
-          {autoRefresh ? "Auto-refresh On" : "Auto-refresh Off"}
+          {autoRefresh
+            ? "Automatikus frissítés bekapcsolva"
+            : "Automatikus frissítés kikapcsolva"}
         </button>
         <button
           onClick={onManualRefresh}

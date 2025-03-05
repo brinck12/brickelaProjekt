@@ -3,6 +3,10 @@ import { ApiResponse, LoginResponse, BookingData } from "../types/api";
 import { Appointment } from "../types/appointment";
 //import { Reference } from "../types/reference";
 
+/**
+ * API hibakezelő osztály
+ * Egyedi hibaüzenetek kezelésére szolgál az API kérések során
+ */
 export class ApiError extends Error {
   constructor(message: string, public statusCode?: number) {
     super(message);
@@ -10,6 +14,11 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * API hibák kezelésére szolgáló segédfüggvény
+ * @param error - A kezelendő hiba objektum
+ * @throws {ApiError} - Formázott hibaüzenettel dobja tovább a hibát
+ */
 const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{
@@ -26,8 +35,15 @@ const handleApiError = (error: unknown) => {
   throw error;
 };
 
+/**
+ * Az API alap URL-je
+ */
 const API_BASE_URL = "http://localhost/project/src/api";
 
+/**
+ * Axios kliens az API kérésekhez
+ * Alapértelmezett beállításokkal és fejlécekkel
+ */
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -60,11 +76,19 @@ apiClient.interceptors.response.use(
   }
 );
 
+/**
+ * Beállítja a felhasználói tokent a localStorage-ban és az API kliens fejlécében
+ * @param token - A beállítandó JWT token
+ */
 export const setUserToken = (token: string) => {
   localStorage.setItem("userToken", token);
   apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
+/**
+ * Inicializálja az autentikációt a localStorage-ban tárolt token alapján
+ * Az alkalmazás indításakor hívódik meg
+ */
 export const initializeAuth = () => {
   const token = localStorage.getItem("userToken");
   if (token) {
@@ -72,6 +96,13 @@ export const initializeAuth = () => {
   }
 };
 
+/**
+ * Felhasználói bejelentkezés
+ * @param email - A felhasználó email címe
+ * @param password - A felhasználó jelszava
+ * @returns {Promise<LoginResponse>} - A bejelentkezési válasz (token és felhasználói adatok)
+ * @throws {ApiError} - Sikertelen bejelentkezés esetén
+ */
 export const login = async (
   email: string,
   password: string
@@ -98,11 +129,20 @@ export const login = async (
   }
 };
 
+/**
+ * Felhasználói kijelentkezés
+ * Törli a tokent a localStorage-ból és az API kliens fejlécéből
+ */
 export const logout = () => {
   localStorage.removeItem("userToken");
   delete apiClient.defaults.headers.common["Authorization"];
 };
 
+/**
+ * Lekéri a bejelentkezett felhasználó adatait
+ * @returns {Promise<any>} - A felhasználói adatokat tartalmazó válasz
+ * @throws {Error} - Sikertelen lekérés esetén
+ */
 export const fetchUserData = async () => {
   console.log("Fetching user data...");
   console.log("Current token:", localStorage.getItem("userToken"));
@@ -116,6 +156,12 @@ export const fetchUserData = async () => {
   }
 };
 
+/**
+ * Frissíti a felhasználó adatait
+ * @param data - A frissítendő felhasználói adatok
+ * @returns {Promise<any>} - A frissítés eredménye
+ * @throws {ApiError} - Sikertelen frissítés esetén
+ */
 export async function updateUserData(data: {
   Keresztnev: string;
   Vezeteknev: string;
@@ -135,6 +181,16 @@ export async function updateUserData(data: {
   }
 }
 
+/**
+ * Új felhasználó regisztrálása
+ * @param email - A felhasználó email címe
+ * @param password - A felhasználó jelszava
+ * @param keresztnev - A felhasználó keresztneve
+ * @param vezeteknev - A felhasználó vezetékneve
+ * @param telefonszam - A felhasználó telefonszáma
+ * @returns {Promise<{data: {success: boolean; message: string}}>} - A regisztráció eredménye
+ * @throws {ApiError} - Sikertelen regisztráció esetén
+ */
 export const register = async (
   email: string,
   password: string,
@@ -160,10 +216,20 @@ export const register = async (
   }
 };
 
+/**
+ * Lekéri az összes fodrászt
+ * @returns {Promise<any>} - A fodrászokat tartalmazó válasz
+ */
 export const fetchBarbers = () => {
   return apiClient.get("/barbers.php");
 };
 
+/**
+ * Új fodrász hozzáadása (admin funkció)
+ * @param formData - A fodrász adatait tartalmazó FormData objektum
+ * @returns {Promise<any>} - A hozzáadás eredménye
+ * @throws {ApiError} - Sikertelen hozzáadás esetén
+ */
 export const addBarber = async (formData: FormData) => {
   try {
     const response = await apiClient.post("/admin/add-barber.php", formData, {
@@ -181,6 +247,12 @@ export const addBarber = async (formData: FormData) => {
   }
 };
 
+/**
+ * Fodrász törlése (admin funkció)
+ * @param barberId - A törlendő fodrász azonosítója
+ * @returns {Promise<any>} - A törlés eredménye
+ * @throws {ApiError} - Sikertelen törlés esetén
+ */
 export const deleteBarber = async (barberId: number) => {
   try {
     const response = await apiClient.post("/admin/delete-barber.php", {
@@ -196,6 +268,13 @@ export const deleteBarber = async (barberId: number) => {
   }
 };
 
+/**
+ * Fodrász adatainak frissítése (admin funkció)
+ * @param barberId - A frissítendő fodrász azonosítója
+ * @param formData - A frissített adatokat tartalmazó FormData objektum
+ * @returns {Promise<any>} - A frissítés eredménye
+ * @throws {ApiError} - Sikertelen frissítés esetén
+ */
 export const updateBarber = async (barberId: number, formData: FormData) => {
   formData.append("barberId", barberId.toString());
   try {
@@ -218,10 +297,20 @@ export const updateBarber = async (barberId: number, formData: FormData) => {
   }
 };
 
+/**
+ * Lekéri az összes szolgáltatást
+ * @returns {Promise<any>} - A szolgáltatásokat tartalmazó válasz
+ */
 export const fetchServices = () => {
   return apiClient.get("/services.php");
 };
 
+/**
+ * Új szolgáltatás hozzáadása (admin funkció)
+ * @param data - A szolgáltatás adatai
+ * @returns {Promise<any>} - A hozzáadás eredménye
+ * @throws {ApiError} - Sikertelen hozzáadás esetén
+ */
 export const addService = async (data: {
   name: string;
   price: number;
@@ -240,6 +329,13 @@ export const addService = async (data: {
   }
 };
 
+/**
+ * Szolgáltatás adatainak frissítése (admin funkció)
+ * @param serviceId - A frissítendő szolgáltatás azonosítója
+ * @param data - A frissített szolgáltatás adatai
+ * @returns {Promise<any>} - A frissítés eredménye
+ * @throws {ApiError} - Sikertelen frissítés esetén
+ */
 export const updateService = async (
   serviceId: number,
   data: {
@@ -264,6 +360,12 @@ export const updateService = async (
   }
 };
 
+/**
+ * Szolgáltatás törlése (admin funkció)
+ * @param serviceId - A törlendő szolgáltatás azonosítója
+ * @returns {Promise<any>} - A törlés eredménye
+ * @throws {ApiError} - Sikertelen törlés esetén
+ */
 export async function deleteService(serviceId: number) {
   try {
     const response = await axios.post(
@@ -284,14 +386,31 @@ export async function deleteService(serviceId: number) {
   }
 }
 
+/**
+ * Ellenőrzi a foglalásokat egy adott fodrászhoz és dátumhoz
+ * @param barberId - A fodrász azonosítója
+ * @param date - A vizsgálandó dátum
+ * @returns {Promise<any>} - A foglalásokat tartalmazó válasz
+ */
 export const checkAppointments = (barberId: string | number, date: string) => {
   return apiClient.post("/check-appointments.php", { barberId, date });
 };
 
+/**
+ * Lekéri egy fodrász értékeléseit
+ * @param barberId - A fodrász azonosítója
+ * @returns {Promise<any>} - Az értékeléseket tartalmazó válasz
+ */
 export const fetchReviews = (barberId: number) => {
   return apiClient.post("/reviews.php", { barberId });
 };
 
+/**
+ * Új foglalás létrehozása
+ * @param bookingData - A foglalás adatai
+ * @returns {Promise<void>} - A foglalás eredménye
+ * @throws {ApiError} - Sikertelen foglalás esetén
+ */
 export const createBooking = async (
   bookingData: BookingData
 ): Promise<void> => {
@@ -308,6 +427,11 @@ export const createBooking = async (
   }
 };
 
+/**
+ * Lekéri a bejelentkezett felhasználó foglalásait
+ * @returns {Promise<Appointment[]>} - A foglalásokat tartalmazó tömb
+ * @throws {ApiError} - Sikertelen lekérés esetén
+ */
 export const fetchAppointments = async (): Promise<Appointment[]> => {
   try {
     const response = await apiClient.get<ApiResponse<Appointment[]>>(
@@ -325,10 +449,20 @@ export const fetchAppointments = async (): Promise<Appointment[]> => {
   }
 };
 
+/**
+ * Lekéri egy fodrász referenciáit
+ * @param barberId - A fodrász azonosítója
+ * @returns {Promise<any>} - A referenciákat tartalmazó válasz
+ */
 export const fetchReferences = (barberId: number) => {
   return apiClient.post("/get-references.php", { barberId });
 };
 
+/**
+ * Lekéri az admin irányítópult statisztikáit
+ * @returns {Promise<any>} - A statisztikákat tartalmazó válasz
+ * @throws {ApiError} - Sikertelen lekérés esetén
+ */
 export const fetchDashboardStats = async () => {
   try {
     const response = await apiClient.get("/admin/dashboard-stats.php");
@@ -344,6 +478,14 @@ export const fetchDashboardStats = async () => {
   }
 };
 
+/**
+ * Értékelés beküldése egy foglaláshoz
+ * @param token - Az értékelési token
+ * @param rating - Az értékelés pontszáma (1-5)
+ * @param comment - Opcionális szöveges értékelés
+ * @returns {Promise<ApiResponse<void>>} - A beküldés eredménye
+ * @throws {ApiError} - Sikertelen beküldés esetén
+ */
 export const submitReview = async (
   token: string,
   rating: number,
@@ -370,6 +512,12 @@ export const submitReview = async (
   }
 };
 
+/**
+ * Email cím megerősítése
+ * @param token - A megerősítési token
+ * @returns {Promise<ApiResponse<void>>} - A megerősítés eredménye
+ * @throws {ApiError} - Sikertelen megerősítés esetén
+ */
 export const verifyEmail = async (
   token: string
 ): Promise<ApiResponse<void>> => {
@@ -389,6 +537,12 @@ export const verifyEmail = async (
   }
 };
 
+/**
+ * Foglalás lemondása
+ * @param token - A lemondási token
+ * @returns {Promise<ApiResponse<void>>} - A lemondás eredménye
+ * @throws {ApiError} - Sikertelen lemondás esetén
+ */
 export const cancelBooking = async (
   token: string
 ): Promise<ApiResponse<void>> => {
@@ -408,6 +562,13 @@ export const cancelBooking = async (
   }
 };
 
+/**
+ * Foglalás adatainak frissítése
+ * @param appointmentId - A frissítendő foglalás azonosítója
+ * @param data - A frissített foglalás adatai
+ * @returns {Promise<any>} - A frissítés eredménye
+ * @throws {ApiError} - Sikertelen frissítés esetén
+ */
 export const updateAppointment = async (
   appointmentId: number,
   data: {
