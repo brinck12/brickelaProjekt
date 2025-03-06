@@ -1,4 +1,3 @@
-import { Clock } from "lucide-react";
 import { Service } from "../types/service";
 
 interface ServiceCardProps {

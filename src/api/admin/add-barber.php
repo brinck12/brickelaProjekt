@@ -2,7 +2,6 @@
 require_once '../config.php';
 require_once '../cors_headers.php';
 
-session_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -121,15 +120,37 @@ try {
         // Adatok validálása
         $vezeteknev = $user['Vezeteknev'];
         $keresztnev = $user['Keresztnev'];
+        
+        // Aktív állapot beállítása
+        $aktiv = 1;
 
         // Borbély hozzáadása
-        $stmt = $conn->prepare("INSERT INTO fodraszok (UgyfelID, Vezeteknev, Keresztnev, evtapasztalat, specializacio, reszletek, KezdesIdo, BefejezesIdo, kep) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ississsss", $ugyfelId, $vezeteknev, $keresztnev, $experience, $specialization, $details, $startTime, $endTime, $newFileName);
+        $stmt = $conn->prepare("INSERT INTO fodraszok (UgyfelID, Vezeteknev, Keresztnev, evtapasztalat, specializacio, reszletek, KezdesIdo, BefejezesIdo, kep, Aktiv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ississsssi", $ugyfelId, $vezeteknev, $keresztnev, $experience, $specialization, $details, $startTime, $endTime, $newFileName, $aktiv);
         
         if ($stmt->execute()) {
+            // Get the newly inserted barber ID
+            $newBarberId = $conn->insert_id;
+            
+            // Create a response with the new barber data
+            $newBarber = [
+                'id' => $newBarberId,
+                'nev' => $vezeteknev . ' ' . $keresztnev,
+                'kep' => $newFileName,
+                'evtapasztalat' => $experience,
+                'specializacio' => $specialization,
+                'reszletek' => $details,
+                'KezdesIdo' => $startTime,
+                'BefejezesIdo' => $endTime,
+                'Aktiv' => $aktiv,
+                'Vezeteknev' => $vezeteknev,
+                'Keresztnev' => $keresztnev
+            ];
+            
             echo json_encode([
                 'success' => true,
-                'message' => 'Barber added successfully'
+                'message' => 'Barber added successfully',
+                'barber' => $newBarber
             ]);
         } else {
             throw new Exception('Failed to add barber');

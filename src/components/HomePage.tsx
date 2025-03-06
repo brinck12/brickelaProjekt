@@ -33,7 +33,7 @@ export default function HomePage() {
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage:
-                'url("https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80")',
+                'url("http://localhost/project/src/imgs/homepage.avif")',
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-barber-dark/70 to-barber-primary/90" />
@@ -108,7 +108,7 @@ export default function HomePage() {
               {/* Classic Cut Card */}
               <div className="group relative overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1599351431613-18ef1fdd27e1?auto=format&fit=crop&q=80"
+                  src="http://localhost/project/src/imgs/display1.avif"
                   alt="Klasszikus Hajvágás"
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -129,7 +129,7 @@ export default function HomePage() {
               {/* Beard Grooming Card */}
               <div className="group relative overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&q=80"
+                  src="http://localhost/project/src/imgs/display2.avif"
                   alt="Szakállformázás"
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -150,7 +150,7 @@ export default function HomePage() {
               {/* Hot Towel Shave Card */}
               <div className="group relative overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?auto=format&fit=crop&q=80"
+                  src="http://localhost/project/src/imgs/display3.avif"
                   alt="Meleg Törölközős Borotválás"
                   className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
                 />

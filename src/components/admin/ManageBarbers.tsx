@@ -38,9 +38,14 @@ export function ManageBarbers() {
     try {
       setIsLoading(true);
       const response = await fetchBarbers();
+      console.log("All barbers from API:", response.data);
+
+      // Handle both string and number types for Aktiv field
       const activeBarbers = response.data.filter(
-        (barber: Barber) => barber.Aktiv === 1
+        (barber: Barber) => String(barber.Aktiv) === "1"
       );
+      console.log("Filtered active barbers:", activeBarbers);
+
       setBarbers(activeBarbers);
     } catch (error) {
       setError("Failed to load barbers");
@@ -52,7 +57,31 @@ export function ManageBarbers() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedImage(e.target.files[0]);
+      // Store the actual File object, not the blob URL
+      const file = e.target.files[0];
+
+      // Check if the file is an image
+      if (!file.type.startsWith("image/")) {
+        setErrorModal({
+          isOpen: true,
+          message: "Csak képfájlokat lehet feltölteni (jpg, png, gif, stb.)",
+        });
+        return;
+      }
+
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorModal({
+          isOpen: true,
+          message: "A kép mérete nem lehet nagyobb 5MB-nál",
+        });
+        return;
+      }
+
+      // Store the file object directly
+      setSelectedImage(file);
+
+      console.log("Selected image:", file.name, file.type, file.size);
     }
   };
 
@@ -73,11 +102,19 @@ export function ManageBarbers() {
     if (!selectedBarber) return;
 
     try {
+      // Create a new FormData object
       const formDataToSend = new FormData();
+
+      // Add barber ID
       formDataToSend.append("id", selectedBarber.id.toString());
+
+      // Add image if selected
       if (selectedImage) {
         formDataToSend.append("image", selectedImage);
+        console.log("Updating with new image:", selectedImage.name);
       }
+
+      // Add other form fields
       formDataToSend.append("email", formData.email);
       formDataToSend.append("experience", formData.experience);
       formDataToSend.append("specialization", formData.specialization);
@@ -93,6 +130,12 @@ export function ManageBarbers() {
       setSelectedImage(null);
     } catch (error) {
       console.error("Failed to update barber:", error);
+      setErrorModal({
+        isOpen: true,
+        message: `Hiba történt a barber frissítése közben: ${
+          error instanceof Error ? error.message : "Ismeretlen hiba"
+        }`,
+      });
     }
   };
 
@@ -103,14 +146,22 @@ export function ManageBarbers() {
     }
 
     try {
+      // Create a new FormData object
       const formDataToSend = new FormData();
+
+      // Append the file directly - this is the key part
       formDataToSend.append("image", selectedImage);
+
+      // Add other form fields
       formDataToSend.append("email", formData.email);
       formDataToSend.append("experience", formData.experience);
       formDataToSend.append("specialization", formData.specialization);
       formDataToSend.append("details", formData.details);
       formDataToSend.append("startTime", formData.startTime);
       formDataToSend.append("endTime", formData.endTime);
+
+      // Log the form data for debugging
+      console.log("Sending form data with image:", selectedImage.name);
 
       const response = await fetch(
         "http://localhost/project/src/api/admin/add-barber.php",
@@ -120,6 +171,7 @@ export function ManageBarbers() {
         }
       );
       const data = await response.json();
+      console.log("Add barber response:", data);
 
       if (data.error) {
         setErrorModal({
@@ -132,8 +184,14 @@ export function ManageBarbers() {
       // Várjunk egy kicsit, hogy a fájl biztosan felkerüljön a szerverre
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Frissítsük a listát
-      await loadBarbers();
+      // Ha a válasz tartalmazza az új borbély adatait, adjuk hozzá közvetlenül az állapothoz
+      if (data.success && data.barber) {
+        console.log("Adding new barber directly to state:", data.barber);
+        setBarbers((prevBarbers) => [...prevBarbers, data.barber]);
+      } else {
+        // Ha nincs barber adat a válaszban, frissítsük a listát
+        await loadBarbers();
+      }
 
       setIsAddModalOpen(false);
       setFormData({
