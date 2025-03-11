@@ -18,7 +18,7 @@ export default function ServiceSelection() {
     const getServices = async () => {
       try {
         const response = await fetchServices(); // API hívás
-        console.log(response);
+        //console.log(response);
         setServices(response.data); // Adatok beállítása
       } catch (error) {
         console.log("Hiba történt az adatok lekérése közben:", error);

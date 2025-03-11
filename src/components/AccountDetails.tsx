@@ -64,7 +64,6 @@ export default function AccountDetails() {
         >
           {isEditing ? <X className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
         </button>
-        console.log(user);
       </div>
 
       {error && (

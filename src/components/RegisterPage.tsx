@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "./Navbar";
 import FormInput from "./FormInput";
 import { register } from "../api/apiService";
 import { ApiError } from "../api/apiService";
@@ -27,12 +26,12 @@ export default function RegisterPage() {
     }
 
     try {
-      console.log("Attempting registration with:", {
+      /*console.log("Attempting registration with:", {
         ...formData,
         password: "[REDACTED]",
         confirmPassword: "[REDACTED]",
       });
-
+*/
       const response = await register(
         formData.email,
         formData.password,
@@ -41,7 +40,7 @@ export default function RegisterPage() {
         formData.telefonszam
       );
 
-      console.log("Registration response:", response);
+      //console.log("Registration response:", response);
 
       if (response.data.success) {
         navigate("/login");
@@ -49,7 +48,7 @@ export default function RegisterPage() {
         setError(response.data.message || "A regisztráció nem sikerült");
       }
     } catch (err) {
-      console.error("Regisztrációs hiba:", err);
+      //console.error("Regisztrációs hiba:", err);
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
@@ -68,7 +67,6 @@ export default function RegisterPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-barber-primary">
-        <Navbar />
         <div className="py-12 px-4">
           <div className="max-w-md mx-auto">
             <div className="bg-barber-dark rounded-lg shadow-lg p-8">

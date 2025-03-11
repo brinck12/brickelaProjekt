@@ -31,11 +31,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      console.log("Refreshing user data...");
+      //console.log("Refreshing user data...");
       const token = localStorage.getItem("userToken");
       if (token) {
         const response = await fetchUserData();
-        console.log("Refresh user response:", response.data);
+        //console.log("Refresh user response:", response.data);
         setUser(response.data);
         localStorage.setItem("user", JSON.stringify(response.data));
       }
@@ -53,10 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuthData = async () => {
       try {
-        console.log("Initializing auth...");
+        //console.log("Initializing auth...");
         const token = localStorage.getItem("userToken");
         if (token) {
-          console.log("Token found, initializing auth...");
+          //console.log("Token found, initializing auth...");
           initializeAuth(); // Initialize axios headers with token
           await refreshUser();
         }

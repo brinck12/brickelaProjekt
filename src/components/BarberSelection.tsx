@@ -18,7 +18,7 @@ export default function BarberSelection() {
     const getBarbers = async () => {
       try {
         const response = await fetchBarbers(); // API hívás
-        console.log(response);
+        //console.log(response);
         setBarbers(response.data); // Adatok beállítása
       } catch (error) {
         console.log("Hiba történt az adatok lekérése közben:", error);

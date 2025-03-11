@@ -20,7 +20,7 @@ export function EmailVerification() {
       verificationAttempted.current = true;
 
       const token = searchParams.get("token");
-      console.log("Verifying token:", token); // Debug log
+      //console.log("Verifying token:", token); // Debug log
 
       if (!token) {
         setStatus("error");
@@ -29,9 +29,9 @@ export function EmailVerification() {
       }
 
       try {
-        console.log("Making verification request..."); // Debug log
+        //console.log("Making verification request..."); // Debug log
         const response = await verifyEmail(token);
-        console.log("Verification response:", response); // Debug log
+        //console.log("Verification response:", response); // Debug log
 
         setStatus("success");
         setMessage(response.message || "Email cím sikeresen megerősítve");
@@ -40,7 +40,7 @@ export function EmailVerification() {
           navigate("/login");
         }, 3000);
       } catch (error) {
-        console.error("Verification error:", error); // Debug log
+        //console.error("Verification error:", error); // Debug log
         setStatus("error");
         if (error instanceof ApiError) {
           setMessage(error.message);

@@ -59,7 +59,7 @@ export default function BookingForm() {
     const savedUser = localStorage.getItem("user");
     const userData = savedUser ? JSON.parse(savedUser) : null;
 
-    console.log("User data:", userData);
+    //console.log("User data:", userData);
     return {
       name: userData?.Keresztnev || "",
       email: userData?.email || "",
@@ -88,38 +88,38 @@ export default function BookingForm() {
     const fetchData = async () => {
       try {
         if (barberId) {
-          console.log("Fetching barber data for ID:", barberId);
+          //console.log("Fetching barber data for ID:", barberId);
           const barberResponse = await fetchBarbers();
-          console.log("All barbers:", barberResponse.data);
+          //console.log("All barbers:", barberResponse.data);
           const selectedBarber = barberResponse.data.find(
             (b: Barber) => b.id.toString() === barberId
           );
-          console.log("Selected barber data:", selectedBarber);
+          //console.log("Selected barber data:", selectedBarber);
           setBarber(selectedBarber || null);
 
           if (selectedBarber) {
-            console.log(
-              "Working hours - Start:",
-              selectedBarber.startTime,
-              "End:",
-              selectedBarber.endTime
-            );
+            //console.log(
+            //  "Working hours - Start:",
+            //  selectedBarber.startTime,
+            //  "End:",
+            //  selectedBarber.endTime
+            //);
             const slots = generateTimeSlots(
               parseInt(selectedBarber.KezdesIdo),
               parseInt(selectedBarber.BefejezesIdo)
             );
-            console.log("Generated time slots:", slots);
+            //console.log("Generated time slots:", slots);
             setTimeSlots(slots);
           }
         }
         if (serviceId) {
-          console.log("Fetching service data for ID:", serviceId);
+          //console.log("Fetching service data for ID:", serviceId);
           const serviceResponse = await fetchServices();
-          console.log("All services:", serviceResponse.data);
+          //console.log("All services:", serviceResponse.data);
           const selectedService = serviceResponse.data.find(
             (s: Service) => s.id.toString() === serviceId
           );
-          console.log("Selected service:", selectedService);
+          //console.log("Selected service:", selectedService);
           setService(selectedService || null);
         }
       } catch (error) {

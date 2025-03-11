@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { cancelBooking, ApiError } from "../api/apiService";
 
 export function CancelBooking() {
-  console.log("CancelBooking component mounted");
+  //console.log("CancelBooking component mounted");
 
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -20,9 +20,9 @@ export function CancelBooking() {
       }
       cancellationAttempted.current = true;
 
-      console.log("Starting cancellation process");
+      //console.log("Starting cancellation process");
       const token = searchParams.get("token");
-      console.log("Token from URL:", token);
+      //console.log("Token from URL:", token);
 
       if (!token) {
         setStatus("error");
@@ -31,9 +31,9 @@ export function CancelBooking() {
       }
 
       try {
-        console.log("Making API request...");
+        //console.log("Making API request...");
         const response = await cancelBooking(token);
-        console.log("API Response:", response);
+        //console.log("API Response:", response);
 
         setStatus("success");
         setMessage(response.message || "Időpont sikeresen lemondva");

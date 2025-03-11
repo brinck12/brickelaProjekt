@@ -24,7 +24,7 @@ export default function LoginPage() {
       } else {
         setError("Váratlan hiba történt");
       }
-      console.error("Login error:", err);
+      //console.error("Login error:", err);
     }
   };
 
