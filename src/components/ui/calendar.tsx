@@ -47,8 +47,9 @@ function Calendar({
         months: "flex flex-col",
         month: "space-y-4",
         caption: "flex justify-center relative items-center h-10",
-        caption_label: "text-xl font-medium text-barber-accent",
-        nav: "space-x-1 flex items-center absolute right-1",
+        caption_label:
+          "text-xl font-medium text-barber-accent inline-flex items-center",
+        nav: "space-x-1 flex items-center ml-2 static",
         nav_button: cn(
           "inline-flex items-center justify-center rounded-md text-barber-accent hover:bg-barber-secondary/20 h-7 w-7",
           "opacity-75 hover:opacity-100 transition-opacity"
