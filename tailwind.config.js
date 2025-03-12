@@ -57,14 +57,11 @@ export default {
         "barber-pattern": "url('/patterns/barber-pattern.png')",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "0.5rem",
+        md: "0.375rem",
+        sm: "0.25rem",
       },
     },
   },
-  plugins: [
-    require("tailwind-scrollbar")({ nocompatible: true }),
-    require("tailwindcss-animate"),
-  ],
+  plugins: [],
 };

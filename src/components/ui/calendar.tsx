@@ -1,104 +1,168 @@
 "use client";
 
-import * as React from "react";
-import { DayPicker } from "react-day-picker";
+import React, { useState } from "react";
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
+  isBefore,
+  startOfDay,
+} from "date-fns";
 import { hu } from "date-fns/locale";
-import { startOfDay } from "date-fns";
 
-import { cn } from "@/lib/utils";
-
-export type CalendarProps = Omit<
-  React.ComponentProps<typeof DayPicker>,
-  "mode" | "selected" | "onSelect"
-> & {
-  onDateSelect?: (date: Date | undefined) => void;
+export type CalendarProps = {
   selected?: Date;
+  onDateSelect?: (date: Date | undefined) => void;
+  className?: string;
 };
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  onDateSelect,
+export function Calendar({
   selected,
-  ...props
+  onDateSelect,
+  className = "",
 }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = startOfDay(new Date());
 
-  const disabledDays = {
-    before: today,
+  const prevMonth = () => {
+    setCurrentMonth(subMonths(currentMonth, 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  const renderHeader = () => {
+    return (
+      <div className="flex justify-between items-center mb-4 px-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            prevMonth();
+          }}
+          className="p-2 rounded-full hover:bg-barber-secondary/20 text-barber-accent"
+        >
+          &lt;
+        </button>
+        <div className="text-xl font-medium text-barber-accent">
+          {format(currentMonth, "yyyy MMMM", { locale: hu })}
+        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            nextMonth();
+          }}
+          className="p-2 rounded-full hover:bg-barber-secondary/20 text-barber-accent"
+        >
+          &gt;
+        </button>
+      </div>
+    );
+  };
+
+  const renderDays = () => {
+    const weekDays = ["H", "K", "SZE", "CS", "P", "SZO", "V"];
+    return (
+      <div className="grid grid-cols-7 text-center">
+        {weekDays.map((day) => (
+          <div
+            key={day}
+            className="h-10 flex items-center justify-center text-black font-bold text-sm uppercase tracking-wider"
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderCells = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+    const dateRange = eachDayOfInterval({
+      start: startDate,
+      end: endDate,
+    });
+
+    const rows: React.ReactNode[] = [];
+    let days: React.ReactNode[] = [];
+
+    dateRange.forEach((day, i) => {
+      days.push(
+        <div
+          key={day.toString()}
+          className="h-10 flex items-center justify-center"
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!isBefore(day, today)) {
+                onDateSelect?.(day);
+              }
+            }}
+            disabled={isBefore(day, today)}
+            className={`w-10 h-10 rounded-full flex items-center justify-center
+              ${
+                !isSameMonth(day, monthStart)
+                  ? "text-barber-secondary/50 opacity-50"
+                  : ""
+              }
+              ${
+                isBefore(day, today)
+                  ? "text-barber-secondary/30 opacity-30 cursor-not-allowed"
+                  : "cursor-pointer hover:bg-barber-secondary/20"
+              }
+              ${
+                isToday(day)
+                  ? "bg-barber-secondary/5 text-barber-accent font-semibold"
+                  : ""
+              }
+              ${
+                selected && isSameDay(day, selected)
+                  ? "bg-barber-accent text-barber-light"
+                  : ""
+              }
+            `}
+          >
+            {format(day, "d")}
+          </button>
+        </div>
+      );
+
+      if ((i + 1) % 7 === 0 || i === dateRange.length - 1) {
+        rows.push(
+          <div key={day.toString()} className="grid grid-cols-7 text-center">
+            {days}
+          </div>
+        );
+        days = [];
+      }
+    });
+
+    return <div>{rows}</div>;
   };
 
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-4", className)}
-      disabled={disabledDays}
-      mode="single"
-      selected={selected}
-      onSelect={onDateSelect}
-      modifiersClassNames={{
-        disabled:
-          "text-barber-secondary/30 opacity-30 hover:bg-transparent cursor-not-allowed",
-        selected: "bg-barber-accent text-barber-primary hover:bg-barber-accent",
-      }}
-      classNames={{
-        root: "w-full",
-        months: "flex flex-col",
-        month: "space-y-4",
-        caption: "flex justify-center relative items-center h-10",
-        caption_label:
-          "text-xl font-medium text-barber-accent inline-flex items-center",
-        nav: "space-x-1 flex items-center ml-2 static",
-        nav_button: cn(
-          "inline-flex items-center justify-center rounded-md text-barber-accent hover:bg-barber-secondary/20 h-7 w-7",
-          "opacity-75 hover:opacity-100 transition-opacity"
-        ),
-        nav_button_previous: "mr-1",
-        nav_button_next: "",
-        table: "w-full border-collapse",
-        head_row: "grid grid-cols-7",
-        head_cell: cn(
-          "text-barber-secondary/70 font-normal text-[0.8rem] text-center",
-          "mb-2 uppercase tracking-wider"
-        ),
-        row: "grid grid-cols-7 gap-0",
-        cell: cn(
-          "p-0 relative focus-within:relative focus-within:z-20 h-9",
-          "[&:has([aria-selected])]:bg-barber-accent/20"
-        ),
-        day: cn(
-          "inline-flex items-center justify-center",
-          "text-sm font-normal w-9 h-9",
-          "text-barber-light hover:bg-barber-secondary/20 hover:text-barber-accent",
-          "focus:bg-barber-accent focus:text-barber-primary",
-          "aria-selected:opacity-100 transition-colors",
-          "rounded-full cursor-pointer"
-        ),
-        day_selected:
-          "bg-barber-accent text-barber-primary hover:bg-barber-accent hover:text-barber-primary focus:bg-barber-accent focus:text-barber-primary",
-        day_today: "bg-barber-secondary/5 text-barber-accent font-semibold",
-        day_outside: "text-barber-secondary/50 opacity-50",
-        day_disabled:
-          "text-barber-secondary/30 opacity-30 hover:bg-transparent cursor-not-allowed pointer-events-none",
-        day_range_middle:
-          "aria-selected:bg-barber-accent aria-selected:text-barber-primary",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      locale={hu}
-      formatters={{
-        formatCaption: (date) => {
-          const year = date.getFullYear();
-          const month = date.toLocaleString("hu-HU", { month: "long" });
-          return `${year} ${month.charAt(0).toUpperCase() + month.slice(1)}`;
-        },
-      }}
-      weekStartsOn={1}
-      {...props}
-    />
+    <div className={`bg-barber-primary p-4 rounded-lg w-full ${className}`}>
+      {renderHeader()}
+      <div className="space-y-1">
+        {renderDays()}
+        {renderCells()}
+      </div>
+    </div>
   );
 }
-Calendar.displayName = "Calendar";
-
-export { Calendar };

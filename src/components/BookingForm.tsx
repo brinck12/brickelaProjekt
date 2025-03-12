@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,6 +53,7 @@ export default function BookingForm() {
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
   const appointmentsRef = useRef<HTMLDivElement>(null);
+  const [notesExpanded, setNotesExpanded] = useState(false);
 
   const [formData, setFormData] = useState(() => {
     // Get user data from localStorage
@@ -160,11 +161,12 @@ export default function BookingForm() {
     setSelectedDate(date);
     setSelectedTime(""); // Reset selected time when date changes
     if (date) {
-      setFormData({
-        ...formData,
+      // Only update the date in formData, but don't trigger booking
+      setFormData((prev) => ({
+        ...prev,
         date: format(date, "yyyy-MM-dd"),
-        time: "",
-      });
+        time: "", // Clear the time when changing date
+      }));
 
       // Wait for the appointments section to render
       setTimeout(() => {
@@ -178,14 +180,27 @@ export default function BookingForm() {
 
   const handleTimeSelection = (time: string) => {
     setSelectedTime(time);
-    setFormData({
-      ...formData,
+    // Only update the time in formData, but don't trigger booking
+    setFormData((prev) => ({
+      ...prev,
       time: time,
-    });
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // This is crucial - it prevents the default form submission
+
+    // Validate that we have all required data before proceeding
+    if (
+      !formData.date ||
+      !formData.time ||
+      !formData.barberId ||
+      !formData.serviceId
+    ) {
+      alert("Kérjük, válassz dátumot és időpontot a foglaláshoz.");
+      return;
+    }
+
     try {
       await createBooking({
         barberId: formData.barberId,
@@ -236,11 +251,11 @@ export default function BookingForm() {
       <div className="py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(`/booking?service=${serviceId}`)}
+            onClick={() => navigate(`/services`)}
             className="flex items-center gap-2 text-barber-accent hover:text-barber-secondary transition-colors mb-8"
           >
             <ArrowLeft size={20} />
-            Vissza a fodrászokhoz
+            Vissza a szolgáltatásokhoz
           </button>
 
           <div className="bg-barber-dark rounded-lg shadow-lg p-8">
@@ -248,40 +263,38 @@ export default function BookingForm() {
               Időpontfoglalás
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left side - Combined Barber and Service Info */}
-              <div>
-                {barber && service && (
-                  <div className="bg-barber-primary p-6 rounded-lg">
-                    <img
-                      src={`http://localhost/project/src/imgs/${barber.kep}`}
-                      alt={barber.nev}
-                      className="w-full h-64 object-cover rounded-lg mb-4"
-                    />
-                    <h2 className="text-xl font-bold text-barber-accent mb-2">
-                      {barber.nev}
-                    </h2>
-                    <p className="text-barber-light/80 whitespace-normal break-words mb-4">
-                      {barber.reszletek}
-                    </p>
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold text-barber-accent">
-                        {service.name}
-                      </h3>
-                      <p className="text-barber-accent">
-                        Ár: {service.price} Ft
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left side - Barber info and form inputs */}
+                <div className="space-y-6">
+                  {barber && service && (
+                    <div className="bg-barber-primary p-6 rounded-lg">
+                      <img
+                        src={`http://localhost/project/src/imgs/${barber.kep}`}
+                        alt={barber.nev}
+                        className="w-full h-64 object-cover rounded-lg mb-4"
+                      />
+                      <h2 className="text-xl font-bold text-barber-accent mb-2">
+                        {barber.nev}
+                      </h2>
+                      <p className="text-barber-light/80 whitespace-normal break-words mb-4">
+                        {barber.reszletek}
                       </p>
-                      <p className="text-barber-secondary">
-                        Időtartam: {service.duration} perc
-                      </p>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-bold text-barber-accent">
+                          {service.name}
+                        </h3>
+                        <p className="text-barber-accent">
+                          Ár: {service.price} Ft
+                        </p>
+                        <p className="text-barber-secondary">
+                          Időtartam: {service.duration} perc
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              {/* Right side - Booking Form */}
-              <div>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Form inputs moved to left side under barber card */}
                   <FormInput
                     label="Teljes Név"
                     type="text"
@@ -312,30 +325,69 @@ export default function BookingForm() {
                     disabled={true}
                   />
 
-                  <div className="space-y-2">
-                    <label className="block text-barber-light">
-                      Megjegyzés (opcionális)
-                    </label>
-                    <textarea
-                      name="megjegyzes"
-                      value={formData.megjegyzes}
-                      onChange={(e) =>
-                        setFormData({ ...formData, megjegyzes: e.target.value })
-                      }
-                      className="w-full px-4 py-2 bg-barber-primary border border-barber-secondary/20 rounded-lg text-barber-light resize-none"
-                      rows={3}
-                      placeholder="További megjegyzések a foglaláshoz..."
-                    />
-                  </div>
+                  <div className="border border-barber-secondary/20 rounded-lg overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setNotesExpanded(!notesExpanded);
+                      }}
+                      className="w-full px-4 py-3 bg-barber-primary flex justify-between items-center text-barber-light hover:bg-barber-secondary/10 transition-colors"
+                    >
+                      <span>Megjegyzés (opcionális)</span>
+                      {notesExpanded ? (
+                        <ChevronUp
+                          size={18}
+                          className="text-barber-secondary"
+                        />
+                      ) : (
+                        <ChevronDown
+                          size={18}
+                          className="text-barber-secondary"
+                        />
+                      )}
+                    </button>
 
+                    <AnimatePresence>
+                      {notesExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <textarea
+                            name="megjegyzes"
+                            value={formData.megjegyzes}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                megjegyzes: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-3 bg-barber-primary text-barber-light resize-none border-t border-barber-secondary/20"
+                            rows={4}
+                            placeholder="További megjegyzések a foglaláshoz..."
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* Right side - Calendar and time slots moved to top */}
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="block text-barber-light">
                       Válassz dátumot
                     </label>
-                    <Calendar
-                      selected={selectedDate}
-                      onDateSelect={handleDateSelect}
-                    />
+                    <div className="bg-barber-primary p-4 rounded-lg w-full">
+                      <Calendar
+                        selected={selectedDate}
+                        onDateSelect={handleDateSelect}
+                        className="w-full"
+                      />
+                    </div>
                   </div>
 
                   <AnimatePresence mode="wait">
@@ -363,13 +415,16 @@ export default function BookingForm() {
                                 <motion.button
                                   key={time}
                                   layout
+                                  type="button"
                                   initial={{ scale: 0.8, opacity: 0 }}
                                   animate={{ scale: 1, opacity: 1 }}
                                   exit={{ scale: 0.8, opacity: 0 }}
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
-                                  type="button"
-                                  onClick={() => handleTimeSelection(time)}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleTimeSelection(time);
+                                  }}
                                   className={`p-2 rounded text-sm ${
                                     selectedTime === time
                                       ? "bg-barber-accent text-barber-primary"
@@ -405,9 +460,9 @@ export default function BookingForm() {
                   >
                     Foglalás megerősítése
                   </button>
-                </form>
+                </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

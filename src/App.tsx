@@ -24,6 +24,7 @@ import BarberDashboard from "./components/barber/BarberDashboard";
 import { EmailVerification } from "./components/EmailVerification";
 import { CancelBooking } from "./components/CancelBooking";
 import ReviewPage from "./components/ReviewPage";
+import ServiceDetailPage from "./components/ServiceDetailPage";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -42,6 +43,14 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <ServiceSelection />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/services/:serviceId"
+          element={
+            <ProtectedRoute>
+              <ServiceDetailPage />
             </ProtectedRoute>
           }
         />
