@@ -8,5 +8,4 @@ export interface Service {
   Ar: number;
   Idotartam: number;
   Leiras?: string;
-  image: string;
 }

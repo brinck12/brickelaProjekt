@@ -99,7 +99,7 @@ export default function BookingConfirmation() {
             className="flex items-center justify-center gap-2 bg-barber-accent hover:bg-barber-secondary text-barber-primary py-3 px-6 rounded-lg transition-colors"
           >
             <Calendar size={20} />
-            Naptárhoz Adás
+            Naptárhoz adás
           </button>
           <button
             onClick={() => navigate("/appointments")}

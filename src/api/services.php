@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'description' => $row['Leiras'],
                 'duration' => $row['IdotartamPerc'],
                 'price' => intval($row['Ar']),
-                'image' => $row['KepURL']
             ];
         }
         

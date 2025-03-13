@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash, Upload, ArrowLeft } from "lucide-react";
-import { fetchServices } from "../../api/apiService";
+import { Plus, Pencil, Trash, ArrowLeft } from "lucide-react";
+import {
+  fetchServices,
+  addService,
+  updateService,
+  deleteService,
+  ApiError,
+} from "../../api/apiService";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,7 +23,6 @@ export function ManageServices() {
     duration: "",
     description: "",
   });
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [errorModal, setErrorModal] = useState({ isOpen: false, message: "" });
   const [deleteConfirmation, setDeleteConfirmation] = useState<number | null>(
     null
@@ -44,82 +49,42 @@ export function ManageServices() {
   };
 
   const handleAddService = async () => {
-    if (!selectedImage) {
-      setErrorModal({ isOpen: true, message: "Kérjük válasszon ki egy képet" });
-      return;
-    }
-
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("image", selectedImage);
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("duration", formData.duration);
-      formDataToSend.append("description", formData.description);
-
-      const response = await fetch(
-        "http://localhost/project/src/api/admin/add-service.php",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
-      );
-      const data = await response.json();
-
-      if (data.error) {
-        setErrorModal({ isOpen: true, message: data.error });
-        return;
-      }
+      await addService({
+        name: formData.name,
+        price: parseInt(formData.price),
+        duration: parseInt(formData.duration),
+        description: formData.description,
+      });
 
       await loadServices();
       setIsAddModalOpen(false);
       setFormData({ name: "", price: "", duration: "", description: "" });
-      setSelectedImage(null);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Nem sikerült hozzáadni a szolgáltatást:", error);
       setErrorModal({
         isOpen: true,
-        message: `Hiba történt a szolgáltatás hozzáadása közben: ${
-          error instanceof Error ? error.message : "Ismeretlen hiba"
-        }`,
+        message:
+          error instanceof ApiError
+            ? error.message
+            : "Ismeretlen hiba történt a szolgáltatás hozzáadása közben",
       });
     }
   };
 
   const handleDeleteService = async (serviceId: number) => {
     try {
-      const formData = new FormData();
-      formData.append("id", serviceId.toString());
-
-      const response = await fetch(
-        "http://localhost/project/src/api/admin/delete-service.php",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await response.json();
-
-      if (data.error) {
-        setErrorModal({ isOpen: true, message: data.error });
-        return;
-      }
-
+      await deleteService(serviceId);
       await loadServices();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Nem sikerült törölni a szolgáltatást:", error);
       setErrorModal({
         isOpen: true,
-        message: `Hiba történt a szolgáltatás törlése közben: ${
-          error instanceof Error ? error.message : "Ismeretlen hiba"
-        }`,
+        message:
+          error instanceof ApiError
+            ? error.message
+            : "Ismeretlen hiba történt a szolgáltatás törlése közben",
       });
-    }
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedImage(e.target.files[0]);
     }
   };
 
@@ -138,43 +103,25 @@ export function ManageServices() {
     if (!selectedService) return;
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("id", selectedService.id.toString());
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("duration", formData.duration);
-      formDataToSend.append("description", formData.description);
-
-      if (selectedImage) {
-        formDataToSend.append("image", selectedImage);
-      }
-
-      const response = await fetch(
-        "http://localhost/project/src/api/admin/edit-service.php",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
-      );
-      const data = await response.json();
-
-      if (data.error) {
-        setErrorModal({ isOpen: true, message: data.error });
-        return;
-      }
+      await updateService(selectedService.id, {
+        name: formData.name,
+        price: parseInt(formData.price),
+        duration: parseInt(formData.duration),
+        description: formData.description,
+      });
 
       await loadServices();
       setIsEditModalOpen(false);
       setSelectedService(null);
       setFormData({ name: "", price: "", duration: "", description: "" });
-      setSelectedImage(null);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Nem sikerült módosítani a szolgáltatást:", error);
       setErrorModal({
         isOpen: true,
-        message: `Hiba történt a szolgáltatás módosítása közben: ${
-          error instanceof Error ? error.message : "Ismeretlen hiba"
-        }`,
+        message:
+          error instanceof ApiError
+            ? error.message
+            : "Ismeretlen hiba történt a szolgáltatás módosítása közben",
       });
     }
   };
@@ -230,7 +177,6 @@ export function ManageServices() {
             <table className="w-full">
               <thead>
                 <tr className="text-left text-barber-light border-b border-barber-secondary/20">
-                  <th className="pb-4">Kép</th>
                   <th className="pb-4">Név</th>
                   <th className="pb-4">Ár</th>
                   <th className="pb-4">Időtartam</th>
@@ -249,13 +195,6 @@ export function ManageServices() {
                       transition={{ duration: 0.2 }}
                       className="text-barber-light border-b border-barber-secondary/10 last:border-0 cursor-default"
                     >
-                      <td className="py-3">
-                        <img
-                          src={`http://localhost/project/src/imgs/${service.image}`}
-                          alt={service.name}
-                          className="w-12 h-12 rounded object-cover"
-                        />
-                      </td>
                       <td className="py-3">{service.name}</td>
                       <td className="py-3">{service.price} Ft</td>
                       <td className="py-3">{service.duration} perc</td>
@@ -305,30 +244,6 @@ export function ManageServices() {
                 Új szolgáltatás hozzáadása
               </h3>
               <div className="space-y-4">
-                <div>
-                  <label className="text-barber-light text-sm block mb-1">
-                    Kép
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {selectedImage && (
-                      <img
-                        src={URL.createObjectURL(selectedImage)}
-                        alt="Preview"
-                        className="w-16 h-16 rounded object-cover"
-                      />
-                    )}
-                    <label className="flex items-center gap-2 px-4 py-2 rounded bg-barber-primary text-white cursor-pointer hover:bg-barber-primary/90">
-                      <Upload className="w-4 h-4" />
-                      Kép kiválasztása
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
-                      />
-                    </label>
-                  </div>
-                </div>
                 <div>
                   <label className="text-barber-light text-sm block mb-1">
                     Név
@@ -425,38 +340,6 @@ export function ManageServices() {
               <div className="space-y-4">
                 <div>
                   <label className="text-barber-light text-sm block mb-1">
-                    Kép
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {selectedImage ? (
-                      <img
-                        src={URL.createObjectURL(selectedImage)}
-                        alt="Preview"
-                        className="w-16 h-16 rounded object-cover"
-                      />
-                    ) : (
-                      selectedService && (
-                        <img
-                          src={`http://localhost/project/src/imgs/${selectedService.image}`}
-                          alt={selectedService.name}
-                          className="w-16 h-16 rounded object-cover"
-                        />
-                      )
-                    )}
-                    <label className="flex items-center gap-2 px-4 py-2 rounded bg-barber-primary text-white cursor-pointer hover:bg-barber-primary/90">
-                      <Upload className="w-4 h-4" />
-                      {selectedImage ? "Kép módosítása" : "Új kép feltöltése"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageChange}
-                      />
-                    </label>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-barber-light text-sm block mb-1">
                     Név
                   </label>
                   <input
@@ -514,7 +397,6 @@ export function ManageServices() {
                     onClick={() => {
                       setIsEditModalOpen(false);
                       setSelectedService(null);
-                      setSelectedImage(null);
                       setFormData({
                         name: "",
                         price: "",

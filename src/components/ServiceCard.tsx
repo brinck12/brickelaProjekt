@@ -11,14 +11,6 @@ export default function ServiceCard({ service, onSelect }: ServiceCardProps) {
       onClick={onSelect}
       className="bg-barber-dark rounded-lg p-6 cursor-pointer hover:bg-barber-dark/80 transition-colors group"
     >
-      <div className="mb-4 overflow-hidden rounded-lg">
-        <img
-          src={`http://localhost/project/src/imgs/${service.image}`}
-          alt={service.name}
-          className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300"
-        />
-      </div>
-
       <h3 className="text-xl font-semibold text-barber-accent mb-2">
         {service.name}
       </h3>
