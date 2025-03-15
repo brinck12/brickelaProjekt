@@ -19,11 +19,11 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
   useEffect(() => {
     const getReviewCount = async () => {
       try {
-        console.log("Fetching reviews for barber:", barber.id);
+        //console.log("Fetching reviews for barber:", barber.id);
         const response = await fetchReviews(barber.id);
-        console.log("Reviews response:", response);
+        //console.log("Reviews response:", response);
         if (response?.data?.success && Array.isArray(response.data.data)) {
-          console.log("Setting review count to:", response.data.data.length);
+          //console.log("Setting review count to:", response.data.data.length);
           setReviewCount(response.data.data.length);
           // Cache the reviews to avoid another fetch when showing reviews
           setReviews(response.data.data);
@@ -42,9 +42,9 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
       const getReviews = async () => {
         setIsLoadingReviews(true);
         try {
-          console.log("Fetching reviews for display");
+          //console.log("Fetching reviews for display");
           const response = await fetchReviews(barber.id);
-          console.log("Reviews response for display:", response);
+          //console.log("Reviews response for display:", response);
           if (response?.data?.success && Array.isArray(response.data.data)) {
             setReviews(response.data.data);
           }
