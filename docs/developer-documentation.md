@@ -670,35 +670,6 @@ Manages authentication state, including:
 - Login/logout functions
 - User data refreshing
 
-## Testing
-
-The application includes several testing approaches:
-
-### Selenium UI Tests
-
-Located in the `tests/selenium` directory, these tests automate UI interactions:
-
-- `login.test.cjs`: Tests user authentication
-- `booking.test.cjs`: Tests the appointment booking process
-- `review.test.cjs`: Tests the review submission functionality
-
-Run Selenium tests with:
-
-```bash
-npm run test:selenium
-```
-
-### Postman API Tests
-
-Located in the `tests/postman` directory, these tests verify API functionality:
-
-- `barbershop-api-tests.postman_collection.json`: Collection of API tests
-- `barbershop-environment.postman_environment.json`: Environment variables
-
-### Manual Testing
-
-A comprehensive manual testing checklist is available in `tests/manual-testing-checklist.md`.
-
 ## Deployment
 
 ### Production Deployment Checklist

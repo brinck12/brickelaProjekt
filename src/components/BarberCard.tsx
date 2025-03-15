@@ -67,19 +67,21 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
   };
 
   return (
-    <div className="bg-barber-primary border border-barber-secondary/20 rounded-none hover:border-barber-accent transition-all duration-300">
+    <div className="bg-barber-primary border border-barber-secondary/20 rounded-none hover:border-barber-accent transition-all duration-300 flex flex-col h-full">
       <img
         src={`http://localhost/project/src/imgs/${barber.kep}`}
         alt={barber.nev}
         className="w-full h-48 object-cover"
       />
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <h3 className="text-xl font-serif mb-2 text-barber-accent">
           {barber.nev}
         </h3>
-        <p className="text-barber-light/80 mb-4 whitespace-normal break-all">
-          {barber.reszletek}
-        </p>
+        <div className="h-20 overflow-y-auto mb-4">
+          <p className="text-barber-light/80 whitespace-normal break-all">
+            {barber.reszletek}
+          </p>
+        </div>
         <div className="flex justify-between items-center mb-6 text-barber-secondary">
           <div className="flex items-center gap-1">
             <Clock size={16} />
@@ -134,7 +136,7 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
 
         <button
           onClick={onSelect}
-          className="w-full bg-barber-primary border-2 border-barber-accent text-barber-accent 
+          className="w-full mt-auto bg-barber-primary border-2 border-barber-accent text-barber-accent 
                    hover:bg-barber-accent hover:text-barber-primary py-2 transition-colors duration-300"
         >
           Foglalás

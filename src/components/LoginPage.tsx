@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import FormInput from "./FormInput";
 import { useAuth } from "../hooks/useAuth";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -36,6 +37,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-barber-primary">
       <div className="py-12 px-4">
         <div className="max-w-md mx-auto">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 text-barber-accent hover:text-barber-secondary transition-colors mb-6"
+          >
+            <ArrowLeft size={20} />
+            Vissza a főoldalra
+          </button>
+
           <div className="bg-barber-dark rounded-lg shadow-lg p-8">
             <h1 className="text-3xl font-bold mb-6 text-barber-accent">
               Bejelentkezés

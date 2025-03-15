@@ -4,6 +4,7 @@ import FormInput from "./FormInput";
 import { register } from "../api/apiService";
 import { ApiError } from "../api/apiService";
 import PageTransition from "./PageTransition";
+import { ArrowLeft } from "lucide-react";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -69,6 +70,14 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-barber-primary">
         <div className="py-12 px-4">
           <div className="max-w-md mx-auto">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 text-barber-accent hover:text-barber-secondary transition-colors mb-6"
+            >
+              <ArrowLeft size={20} />
+              Vissza a főoldalra
+            </button>
+
             <div className="bg-barber-dark rounded-lg shadow-lg p-8">
               <h1 className="text-3xl font-bold mb-6 text-barber-accent">
                 Regisztráció

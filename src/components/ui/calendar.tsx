@@ -111,6 +111,9 @@ export function Calendar({
             onClick={(e) => {
               e.preventDefault();
               if (!isBefore(day, today)) {
+                if (!isSameMonth(day, currentMonth)) {
+                  setCurrentMonth(day);
+                }
                 onDateSelect?.(day);
               }
             }}
