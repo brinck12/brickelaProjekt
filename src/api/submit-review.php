@@ -11,112 +11,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        // Get and decode the request body
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        if (!isset($data['token'], $data['rating'])) {
-            throw new Exception('Hiányzó kötelező mezők');
-        }
-        
-        // Validate rating
-        $rating = intval($data['rating']);
-        if ($rating < 1 || $rating > 5) {
-            throw new Exception('Érvénytelen értékelés');
-        }
-        
-        // Start transaction
-        $conn->begin_transaction();
-        
-        try {
-            // Get booking ID and related info from review token
-            $stmt = $conn->prepare("
-                SELECT rt.FoglalasID, rt.Used, rt.ExpiresAt, f.FodraszID, f.UgyfelID
-                FROM review_tokens rt
-                JOIN foglalasok f ON rt.FoglalasID = f.FoglalasID
-                WHERE rt.Token = ?
-                AND rt.Used = 0
-                AND rt.ExpiresAt > NOW()
-            ");
-            
-            $stmt->bind_param("s", $data['token']);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows === 0) {
-                throw new Exception('Érvénytelen vagy lejárt értékelési token');
-            }
-            
-            $tokenData = $result->fetch_assoc();
-            
-            // Mark token as used
-            $updateToken = $conn->prepare("
-                UPDATE review_tokens 
-                SET Used = 1 
-                WHERE Token = ?
-            ");
-            
-            $updateToken->bind_param("s", $data['token']);
-            $updateToken->execute();
-            
-            // Store the review in foglalasok table
-            $updateBooking = $conn->prepare("
-                UPDATE foglalasok 
-                SET 
-                    review_rating = ?,
-                    review_comment = ?,
-                    review_date = NOW()
-                WHERE FoglalasID = ?
-            ");
-            
-            $comment = isset($data['comment']) ? $data['comment'] : null;
-            $updateBooking->bind_param("isi", 
-                $rating,
-                $comment,
-                $tokenData['FoglalasID']
-            );
-            
-            if (!$updateBooking->execute()) {
-                throw new Exception('Nem sikerült menteni az értékelést');
-            }
+// Get the POST data
+$data = json_decode(file_get_contents('php://input'), true);
 
-            // Insert into ertekelesek table with correct field names
-            $insertReview = $conn->prepare("
-                INSERT INTO ertekelesek 
-                (FoglalasID, Ertekeles, Velemeny, LetrehozasIdopontja)
-                VALUES (?, ?, ?, NOW())
-            ");
-
-            $insertReview->bind_param("iis",
-                $tokenData['FoglalasID'],
-                $rating,
-                $comment
-            );
-
-            if (!$insertReview->execute()) {
-                throw new Exception('Nem sikerült menteni az értékelést az értékelések táblába');
-            }
-            
-            // Commit transaction
-            $conn->commit();
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Köszönjük az értékelést!'
-            ]);
-            
-        } catch (Exception $e) {
-            $conn->rollback();
-            throw $e;
-        }
-        
-    } catch (Exception $e) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => $e->getMessage()
-        ]);
-    }
+if (!isset($data['token']) || !isset($data['rating']) || !isset($data['comment'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Missing required fields']);
+    exit;
 }
+
+$token = $data['token'];
+$rating = intval($data['rating']);
+$comment = $data['comment'];
+
+// Validate rating
+if ($rating < 1 || $rating > 5) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Rating must be between 1 and 5']);
+    exit;
+}
+
+try {
+    // Get review token details and check if it's valid
+    $stmt = $conn->prepare("
+        SELECT r.FoglalasID, r.Used, r.ExpiresAt, f.FodraszID, f.UgyfelID
+        FROM reviews r
+        JOIN foglalasok f ON r.FoglalasID = f.FoglalasID
+        WHERE r.Token = ? AND r.Used = FALSE AND r.ExpiresAt > NOW()
+    ");
+    
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception('Invalid or expired review token');
+    }
+    
+    $review = $result->fetch_assoc();
+    
+    // Begin transaction
+    $conn->begin_transaction();
+    
+    // Update the review
+    $updateReview = $conn->prepare("
+        UPDATE reviews 
+        SET rating = ?, 
+            comment = ?, 
+            review_date = NOW(),
+            Used = TRUE 
+        WHERE Token = ?
+    ");
+    
+    $updateReview->bind_param("iss",
+        $rating,
+        $comment,
+        $token
+    );
+    
+    if (!$updateReview->execute()) {
+        throw new Exception('Failed to submit review');
+    }
+    
+    // Commit transaction
+    $conn->commit();
+    
+    echo json_encode([
+        'success' => true,
+        'message' => 'Review submitted successfully'
+    ]);
+    
+} catch (Exception $e) {
+    if ($conn->connect_error === false) {
+        $conn->rollback();
+    }
+    
+    http_response_code(400);
+    echo json_encode([
+        'error' => $e->getMessage()
+    ]);
+}
+
+$stmt->close();
+$updateReview->close();
+$conn->close();
 ?> 

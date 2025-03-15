@@ -11,38 +11,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'config.php';
 
-$data = json_decode(file_get_contents('php://input'), true);
-$barberId = $data['barberId'];
+try {
+    // Get POST data
+    $data = json_decode(file_get_contents('php://input'), true);
+    $barberId = isset($data['barberId']) ? intval($data['barberId']) : null;
 
-$sql = "SELECT 
-    e.ErtekelesID AS ReviewID,
-    e.Ertekeles AS ertekeles,
-    e.Velemeny AS velemeny,
-    e.LetrehozasIdopontja AS LetrehozasIdopontja,
-    CONCAT(u.Keresztnev, ' ', u.Vezeteknev) as ertekelo_neve,  -- Concatenate first and last name of the reviewer
-    f.Keresztnev AS BarberFirstName,                             -- Barber first name
-    f.Vezeteknev AS BarberLastName                               -- Barber last name
-FROM 
-    ertekelesek e
-JOIN 
-    foglalasok fo ON e.FoglalasID = fo.FoglalasID
-JOIN 
-    ugyfelek u ON fo.UgyfelID = u.UgyfelID
-JOIN 
-    fodraszok f ON fo.FodraszID = f.FodraszID
-WHERE 
-    f.FodraszID = ?";
+    // Debug log
+    error_log("Fetching reviews for barber ID: " . ($barberId ?? 'all'));
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $barberId);
-$stmt->execute();
-$result = $stmt->get_result();
+    // Base query - simplified to ensure we get all reviews
+    $sql = "SELECT 
+        r.ID as id,
+        r.rating as ertekeles,
+        r.comment as velemeny,
+        r.review_date as letrehozasIdopontja,
+        CONCAT(u.Keresztnev, ' ', u.Vezeteknev) as ertekelo_neve,
+        f.FodraszID as barberId,
+        s.SzolgaltatasNev as szolgaltatas_neve
+    FROM reviews r
+    INNER JOIN foglalasok f ON r.FoglalasID = f.FoglalasID
+    INNER JOIN ugyfelek u ON f.UgyfelID = u.UgyfelID
+    INNER JOIN szolgaltatasok s ON f.SzolgaltatasID = s.SzolgaltatasID
+    WHERE r.Used = TRUE 
+    AND r.rating IS NOT NULL";
 
-$reviews = [];
-while ($row = $result->fetch_assoc()) {
-    $reviews[] = $row;
+    // Add barber filter if barberId is provided
+    if ($barberId !== null) {
+        $sql .= " AND f.FodraszID = ?";
+    }
+
+    $sql .= " ORDER BY r.review_date DESC LIMIT 50";
+
+    // Debug log
+    error_log("SQL Query: " . $sql);
+
+    $stmt = $conn->prepare($sql);
+    
+    if ($barberId !== null) {
+        $stmt->bind_param("i", $barberId);
+        // Debug log
+        error_log("Binding parameter barberId: " . $barberId);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if (!$result) {
+        throw new Exception("Error fetching reviews: " . $conn->error);
+    }
+    
+    $reviews = [];
+    while ($row = $result->fetch_assoc()) {
+        $reviews[] = [
+            'id' => intval($row['id']),
+            'barberId' => intval($row['barberId']),
+            'ertekeles' => intval($row['ertekeles']),
+            'velemeny' => $row['velemeny'],
+            'letrehozasIdopontja' => $row['letrehozasIdopontja'],
+            'ertekelo_neve' => $row['ertekelo_neve'],
+            'szolgaltatas_neve' => $row['szolgaltatas_neve']
+        ];
+    }
+
+    // Debug log
+    error_log("Found " . count($reviews) . " reviews");
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $reviews
+    ]);
+    
+} catch (Exception $e) {
+    error_log("Error in reviews.php: " . $e->getMessage());
+    http_response_code(400);
+    echo json_encode([
+        'error' => $e->getMessage()
+    ]);
 }
-//var_dump($reviews);
-echo json_encode($reviews);
+
 $conn->close();
 ?>
