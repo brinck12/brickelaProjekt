@@ -114,14 +114,17 @@ export default function AccountDetails() {
           <div className="flex-1">
             <p className="text-sm text-barber-secondary">E-mail</p>
             {isEditing ? (
-              <input
-                type="email"
-                value={formData.Email}
-                onChange={(e) =>
-                  setFormData({ ...formData, Email: e.target.value })
-                }
-                className="w-full bg-barber-primary text-barber-light p-1 rounded"
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  value={formData.Email}
+                  readOnly
+                  className="w-full bg-barber-primary/50 text-barber-light p-1 rounded cursor-not-allowed"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-barber-secondary">
+                  Nem módosítható
+                </div>
+              </div>
             ) : (
               <p className="text-barber-light">{user.Email}</p>
             )}

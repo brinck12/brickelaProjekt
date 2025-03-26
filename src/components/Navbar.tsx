@@ -123,9 +123,11 @@ export default function Navbar() {
                   </button>
                   <button
                     onClick={() => {
-                      logout();
-                      navigate("/");
-                      setIsDropdownOpen(false);
+                      navigate("/", { replace: true });
+                      setTimeout(() => {
+                        logout();
+                        setIsDropdownOpen(false);
+                      }, 100);
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-barber-primary text-red-400"
                   >
@@ -215,9 +217,11 @@ export default function Navbar() {
                 </button>
                 <button
                   onClick={() => {
-                    logout();
-                    navigate("/");
-                    setIsMobileMenuOpen(false);
+                    navigate("/", { replace: true });
+                    setTimeout(() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }, 100);
                   }}
                   className="text-red-400 hover:text-red-300"
                 >
