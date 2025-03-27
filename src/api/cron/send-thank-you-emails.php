@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/config.php';
-require_once dirname(__DIR__) . '/mail.php';
+require_once dirname(__DIR__) . '/services/EmailService.php';
 
 try {
     // Get completed appointments that haven't had thank you emails sent
@@ -12,10 +12,13 @@ try {
             u.Email,
             u.Keresztnev as user_firstname,
             b.Keresztnev as barber_firstname,
-            b.Vezeteknev as barber_lastname
+            b.Vezeteknev as barber_lastname,
+            sz.SzolgaltatasNev as szolgaltatas_nev,
+            sz.Ar as ar
         FROM foglalasok f
         JOIN ugyfelek u ON f.UgyfelID = u.UgyfelID
         JOIN fodraszok b ON f.FodraszID = b.FodraszID
+        JOIN szolgaltatasok sz ON f.SzolgaltatasID = sz.SzolgaltatasID
         WHERE f.Allapot = 'Teljesítve'
         AND f.thankyou_email_sent = FALSE
         AND f.FoglalasDatum <= CURDATE()
@@ -24,6 +27,9 @@ try {
 
     $stmt->execute();
     $result = $stmt->get_result();
+
+    // Initialize email service
+    $emailService = new EmailService();
 
     while ($booking = $result->fetch_assoc()) {
         // Generate review token
@@ -48,20 +54,59 @@ try {
         );
 
         if ($insertToken->execute()) {
-            // Send thank you email with review link
-            $to = $booking['Email'];
-            $subject = "Köszönjük a látogatást!";
-            
+            // Create HTML email content
             $reviewLink = "http://localhost:5173/review?token=" . $token;
-            
-            $message = "Kedves {$booking['user_firstname']}!\n\n";
-            $message .= "Köszönjük, hogy {$booking['barber_firstname']} {$booking['barber_lastname']} szolgáltatását választotta.\n";
-            $message .= "Kérjük, értékelje a szolgáltatást az alábbi linken:\n";
-            $message .= $reviewLink . "\n\n";
-            $message .= "Az értékelési link 7 napig érvényes.\n\n";
-            $message .= "Üdvözlettel,\nBrickelaCuts csapata";
+            $emailContent = '
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Köszönjük a látogatást!</title>
+            </head>
+            <body style="margin: 0; padding: 0; background-color: #1a1a1a; color: #ffffff; font-family: Arial, sans-serif;">
+                <div style="max-width: 400px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h1 style="color: #c0a080; margin: 0; font-size: 24px;">BrickEla Cuts</h1>
+                    </div>
+                    
+                    <div style="padding: 20px; background-color: #1a1a1a; color: #ffffff;">
+                        <h2 style="color: #c0a080; font-size: 20px; margin-bottom: 15px;">Köszönjük a látogatást!</h2>
+                        
+                        <p style="font-size: 14px; line-height: 1.5; color: #ffffff;">Kedves ' . htmlspecialchars($booking['user_firstname']) . '!</p>
+                        
+                        <p style="font-size: 14px; line-height: 1.5; color: #ffffff;">Köszönjük, hogy ' . htmlspecialchars($booking['barber_firstname'] . ' ' . $booking['barber_lastname']) . ' szolgáltatását választotta.</p>
+                        
+                        <div style="background-color: rgba(255,255,255,0.05); padding: 15px; border-radius: 4px; margin: 15px 0; font-size: 14px;">
+                            <p style="margin: 8px 0;"><strong style="color: #c0a080;">Szolgáltatás:</strong> <span style="color: #ffffff;">' . htmlspecialchars($booking['szolgaltatas_nev']) . '</span></p>
+                            <p style="margin: 8px 0;"><strong style="color: #c0a080;">Ár:</strong> <span style="color: #ffffff;">' . number_format($booking['ar'], 0, ',', ' ') . ' Ft</span></p>
+                        </div>
+                        
+                        <p style="font-size: 14px; line-height: 1.5; color: #ffffff;">Kérjük, értékelje a szolgáltatást az alábbi gombra kattintva:</p>
+                        
+                        <div style="text-align: center; margin: 25px 0;">
+                            <a href="' . $reviewLink . '" 
+                               style="display: inline-block; padding: 10px 20px; background-color: #c0a080; color: #ffffff; 
+                                      text-decoration: none; border-radius: 4px; font-size: 14px;">
+                                Értékelés írása
+                            </a>
+                        </div>
+                        
+                        <p style="font-size: 12px; color: #888;">Ha a gomb nem működik, másold be ezt a linket a böngésződbe:</p>
+                        <p style="word-break: break-all; color: #c0a080; font-size: 12px;">' . $reviewLink . '</p>
+                        
+                        <p style="font-size: 12px; color: #888; margin-top: 20px;">Az értékelési link 7 napig érvényes.</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 15px; color: rgba(255,255,255,0.5); font-size: 11px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px;">
+                        <p style="margin: 5px 0;">© 2024 BrickEla Cuts - Minden jog fenntartva</p>
+                        <p style="margin: 5px 0;">Cím: 1234 Budapest, Példa utca 123.</p>
+                    </div>
+                </div>
+            </body>
+            </html>';
 
-            if (sendMail($to, $subject, $message)) {
+            // Send thank you email
+            if ($emailService->sendThankYouEmail($booking['Email'], $emailContent)) {
                 // Update booking to mark thank you email as sent
                 $updateBooking = $conn->prepare("
                     UPDATE foglalasok 

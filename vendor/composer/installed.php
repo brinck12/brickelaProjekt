@@ -3,7 +3,7 @@
         'name' => 'brickelacuts/projekt',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '9cab9da8d0f0ddff058903aeca16290a7b589e47',
+        'reference' => '1ab96bdb4fafd0471977e2b7245f58067702f079',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'brickelacuts/projekt' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '9cab9da8d0f0ddff058903aeca16290a7b589e47',
+            'reference' => '1ab96bdb4fafd0471977e2b7245f58067702f079',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
