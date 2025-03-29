@@ -20,7 +20,7 @@ try {
         JOIN fodraszok b ON f.FodraszID = b.FodraszID
         JOIN szolgaltatasok sz ON f.SzolgaltatasID = sz.SzolgaltatasID
         WHERE f.Allapot = 'Teljesítve'
-        AND f.thankyou_email_sent = FALSE
+        AND f.thankyou_email_sent = 0
         AND f.FoglalasDatum <= CURDATE()
         AND f.FoglalasIdo <= CURTIME()
     ");

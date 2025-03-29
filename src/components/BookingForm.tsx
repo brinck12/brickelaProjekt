@@ -272,7 +272,7 @@ export default function BookingForm() {
                       <img
                         src={`http://localhost/project/src/imgs/${barber.kep}`}
                         alt={barber.nev}
-                        className="w-full h-64 object-cover rounded-lg mb-4"
+                        className="w-full h-100 object-cover rounded-lg mb-4"
                       />
                       <h2 className="text-xl font-bold text-barber-accent mb-2">
                         {barber.nev}

@@ -17,10 +17,10 @@ export default function ReviewCard({ review }: ReviewCardProps) {
         </div>
         <div className="flex items-center gap-1">
           <Star className="w-5 h-5 fill-current text-yellow-400" />
-          <span className="text-slate-300">{review.ertekeles}</span>
+          <span className="text-slate-300 ">{review.ertekeles}</span>
         </div>
       </div>
-      <p className="text-slate-300 mb-2">{review.velemeny}</p>
+      <p className="text-slate-300 mb-2 break-words">{review.velemeny}</p>
       <p className="text-sm text-slate-500">
         {new Date(review.letrehozasIdopontja).toLocaleDateString()}
       </p>

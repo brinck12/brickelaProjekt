@@ -86,7 +86,7 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
           {barber.nev}
         </h3>
         <div className="h-20 overflow-y-auto mb-4">
-          <p className="text-barber-light/80 whitespace-normal break-all">
+          <p className="text-barber-light/80 whitespace-normal break-words">
             {barber.reszletek}
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function BarberCard({ barber, onSelect }: BarberCardProps) {
                   key={index}
                   className="text-barber-light/80 text-sm border-l-2 border-barber-accent pl-3"
                 >
-                  <p className="whitespace-normal break-all">
+                  <p className="whitespace-normal break-words">
                     {review.velemeny}
                   </p>
                   <div className="flex items-center mt-1">
